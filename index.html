@@ -19,7 +19,6 @@
         .glow { box-shadow: 0 0 15px #00ff00; }
         .animate-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .grid-27 { display: grid; grid-template-columns: repeat(27, 1fr); gap: 1px; }
         input, button { 
             background: black; 
             border: 1px solid #00ff00; 
@@ -42,28 +41,13 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Crypto utilities
-        const createHash = (text) => {
-            // Simple hash simulation for demo
-            let hash = 0;
-            for (let i = 0; i < text.length; i++) {
-                const char = text.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return Math.abs(hash).toString(16);
-        };
-
-        const validateAnswer = (level, answer) => {
-            const normalized = answer.trim().toUpperCase().replace(/\s+/g, "");
-            const answers = {
-                1: "WHOAREYOU",
-                2: "WISDOMCOMESTOTHOSEWHOSEEK", 
-                3: "THEANSWERISFORTYTWO",
-                4: "FINALSTAGE",
-                5: "FINALCHAMBER"
-            };
-            return normalized === answers[level] || normalized === "42" && level === 3;
+        // Обфусцированная проверка ответов
+        const _0x4f2a = ['V0hPQVJFWU9V', 'V0lTRE9NQ09NRVNUT1RIT1NFV0hPU0VFSw==', 'VEhFQU5TV0VSSVNGT1JUWVRXT0==', 'RklOQUxTVEFHRQ==', 'RklOQUxDSEFNQkVS'];
+        const _0x1b3c = (str) => atob(str);
+        const _0x9d8e = (text, level) => {
+            const norm = text.trim().toUpperCase().replace(/\s+/g, "");
+            const target = _0x1b3c(_0x4f2a[level - 1]);
+            return norm === target || (level === 3 && norm === "42");
         };
 
         // Level 1 Component
@@ -73,7 +57,7 @@
             const [showAnalyzer, setShowAnalyzer] = useState(false);
 
             const handleSubmit = () => {
-                if (validateAnswer(1, input)) {
+                if (_0x9d8e(input, 1)) {
                     setMessage("✅ Authentication successful! Redirecting...");
                     setTimeout(() => onComplete(2), 2000);
                 } else {
@@ -118,8 +102,8 @@
                     {showAnalyzer && (
                         <div className="card mt-6">
                             <h3>Caesar Cipher Analyzer</h3>
-                            <p>Hint: Try shifting each letter by 3 positions in the alphabet</p>
-                            <p>K → H, R → O, Z → W</p>
+                            <p>Hint: Try shifting each letter by different positions in the alphabet</p>
+                            <p>Each letter moves the same number of positions</p>
                         </div>
                     )}
 
@@ -137,7 +121,7 @@
             const [showMatrix, setShowMatrix] = useState(false);
 
             const handleSubmit = () => {
-                if (validateAnswer(2, input)) {
+                if (_0x9d8e(input, 2)) {
                     setMessage("✅ Wisdom acknowledged. Truth revealed. Proceeding...");
                     setTimeout(() => onComplete(3), 2000);
                 } else {
@@ -217,7 +201,7 @@
             const [showAnalysis, setShowAnalysis] = useState(false);
 
             const handleSubmit = () => {
-                if (validateAnswer(3, input)) {
+                if (_0x9d8e(input, 3)) {
                     setMessage("✅ Message validated! Douglas Adams would be proud. Advancing...");
                     setTimeout(() => onComplete(4), 2000);
                 } else {
@@ -293,7 +277,7 @@
             const [showMatrix, setShowMatrix] = useState(false);
 
             const handleSubmit = () => {
-                if (validateAnswer(4, input)) {
+                if (_0x9d8e(input, 4)) {
                     setMessage("✅ Playfair cipher mastered! Proceeding to final challenge...");
                     setTimeout(() => onComplete(5), 2000);
                 } else {
@@ -362,11 +346,25 @@
 inuB/fD57r Yn qjhm 6vxlm - JfkG 1V WWFM:h,  
 u: u7 TFjQmW 4ddV 3l mD7 ok7O APEe s TBEf 9iM4 J2 Lrfg:A.
 I ZMn887 vhP F5 gdPX DCFziF - gVqQO Z1 OszO UtqB,  
-/Mpdp m2 Ncl5 yMn7 qtEF, LML g1x O:WpW xjhJa Y2 ydlZ YW.`;
+/Mpdp m2 Ncl5 yMn7 qtEF, LML g1x O:WpW xjhJa Y2 ydlZ YW.
+xQdoao7 Pm c1v: vzdj - Rq:fq 8I /8C,  
+tjp a tj/FhB :jVgs MtlsZXH mq: adPTI 36Wi Ad0NOC 3Yd jqQiJhwn.
+qAjc H:l: AnYuuS9 yN 7KF 7TAT B/bW RP2ypB -  
+OFcT tiIn 1HumRu n6e q9vn6n fxY yW 6LX bj06/ 7G 70aMmf.
+HGg GbG722t nHg 0p7 XOXpN3 - CFB i8b sL6f,  
+Btu TPY 6cnn O/oBGv zbCc pSx3 zv0lXk :TR0.
+8Wc 4HwRV5E wizdw V2tsL - rAbkbEP 24bG UialHdLzoL,  
+fCX2 Eu9 4FU7 f5Gk 8ef YmH6 vHO KDkPdjs c7EW.
+:PLb1 BX hWnz-UtE1otxZE nt20tP, ipE dySDk ZTq QADS0t -  
+W VZHG qthXe0r DhOIEvP 0o ZL/dWk bG eba yuxv.
+zew DWGikCiDtZ lv 6WtP PGCm - zF3dQE xP PC/,  
+9NJ KNJjV0 k9 qlNy lfm/7, 8Nj UZOA7KQ CeP6N WhD hnp :zX'FGmc3.
+QcG6x GYGSHxn6E nG9 tzk EiwleC KO oBr 2O1i3Q -  
+zvL WaZ7 hg:YfF5 55au5CB G27Sj, BWn V8tR AKaFW KG 3PKFo0xWop.
+w9bb oA mkD Vs/. m433BJ-wogkMNY`;
 
             const handleSubmit = () => {
-                const normalized = input.trim().toLowerCase().replace(/\s+/g, "");
-                if (normalized.includes("finalchamber") || normalized.includes("final-chamber")) {
+                if (_0x9d8e(input, 5)) {
                     setMessage("🎉 MASTER CIPHER SOLVED! 🎉");
                     setTimeout(() => onComplete(6), 2000);
                 } else {
