@@ -3,40 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CryptoStego — iOS Style</title>
+    <title>CryptoStego — Linux Style</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --ios-bg: #F2F2F7;
-            --ios-card-bg: #FFFFFF;
-            --ios-primary: #007AFF;
-            --ios-green: #34C759;
-            --ios-red: #FF3B30;
-            --ios-orange: #FF9500;
-            --ios-purple: #AF52DE;
-            --ios-gray1: #8E8E93;
-            --ios-gray2: #AEAEB2;
-            --ios-gray3: #C7C7CC;
-            --ios-gray4: #D1D1D6;
-            --ios-gray5: #E5E5EA;
-            --ios-gray6: #F2F2F7;
-            --ios-label: #000000;
-            --ios-secondary-label: rgba(60, 60, 67, 0.6);
-            --ios-system-materials: rgba(250, 250, 250, 0.93);
-            --ios-border: rgba(0, 0, 0, 0.1);
-            --ios-shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --ios-bg: #000000;
-                --ios-card-bg: #1C1C1E;
-                --ios-label: #FFFFFF;
-                --ios-secondary-label: rgba(235, 235, 245, 0.6);
-                --ios-system-materials: rgba(30, 30, 30, 0.93);
-                --ios-border: rgba(255, 255, 255, 0.1);
-                --ios-shadow: rgba(0, 0, 0, 0.3);
-            }
+            --linux-bg: #2d2d2d;
+            --linux-header-bg: #222222;
+            --linux-card-bg: #363636;
+            --linux-border: #555555;
+            --linux-text: #cccccc;
+            --linux-accent: #4a8cbe;
+            --linux-accent-hover: #5ba5d6;
+            --linux-success: #6ac76a;
+            --linux-warning: #d9a85f;
+            --linux-error: #d16868;
+            --linux-scrollbar: #555555;
+            --linux-scrollbar-thumb: #888888;
         }
 
         * {
@@ -48,329 +30,348 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            background-color: var(--ios-bg);
-            color: var(--ios-label);
-            line-height: 1.4;
+            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', sans-serif;
+            background-color: var(--linux-bg);
+            color: var(--linux-text);
+            line-height: 1.5;
             min-height: 100vh;
             padding: 0;
             display: flex;
             flex-direction: column;
         }
 
-        .ios-status-bar {
-            height: 44px;
-            background-color: var(--ios-card-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--ios-border);
-            padding: 0 16px;
-        }
-
-        .ios-status-bar-time {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .ios-nav-bar {
-            height: 44px;
-            background-color: var(--ios-card-bg);
+        /* Заголовок в стиле Linux */
+        .linux-header {
+            background-color: var(--linux-header-bg);
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--linux-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 16px;
-            border-bottom: 1px solid var(--ios-border);
         }
 
-        .ios-nav-title {
-            font-weight: 600;
-            font-size: 17px;
+        .linux-title {
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        .ios-nav-button {
-            color: var(--ios-primary);
-            font-weight: 600;
-            font-size: 17px;
-            background: none;
-            border: none;
-            padding: 8px 12px;
+        .linux-window-controls {
+            display: flex;
+            gap: 8px;
         }
 
-        .ios-container {
+        .linux-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .linux-control.close {
+            background-color: #ff5f56;
+        }
+
+        .linux-control.minimize {
+            background-color: #ffbd2e;
+        }
+
+        .linux-control.maximize {
+            background-color: #27c93f;
+        }
+
+        /* Контейнер содержимого */
+        .linux-container {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             width: 100%;
         }
 
-        .ios-card {
-            background-color: var(--ios-card-bg);
-            border-radius: 14px;
+        /* Карточки в стиле Linux */
+        .linux-card {
+            background-color: var(--linux-card-bg);
+            border: 1px solid var(--linux-border);
+            border-radius: 4px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 12px var(--ios-shadow);
         }
 
-        .ios-segmented-control {
+        .linux-card-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--linux-text);
             display: flex;
-            background-color: var(--ios-gray6);
-            border-radius: 9px;
-            padding: 3px;
+            align-items: center;
+            border-bottom: 1px solid var(--linux-border);
+            padding-bottom: 8px;
+        }
+
+        .linux-card-title i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        /* Вкладки в стиле Linux */
+        .linux-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--linux-border);
             margin-bottom: 16px;
         }
 
-        .ios-segment {
-            flex: 1;
-            text-align: center;
-            padding: 7px 0;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 7px;
+        .linux-tab {
+            padding: 8px 16px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 4px;
+            background-color: var(--linux-card-bg);
         }
 
-        .ios-segment.active {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .linux-tab.active {
+            background-color: var(--linux-header-bg);
+            border-color: var(--linux-border);
+            color: var(--linux-accent);
         }
 
-        .dark-mode .ios-segment.active {
-            background-color: var(--ios-gray5);
-        }
-
-        .ios-section-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--ios-label);
-            display: flex;
-            align-items: center;
-        }
-
-        .ios-section-title i {
-            margin-right: 8px;
-            font-size: 16px;
-        }
-
-        .ios-input {
+        /* Элементы форм в стиле Linux */
+        .linux-input {
             width: 100%;
-            padding: 12px;
-            background-color: var(--ios-gray6);
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 8px;
+            background-color: var(--linux-bg);
+            border: 1px solid var(--linux-border);
+            border-radius: 4px;
+            font-size: 14px;
             margin-bottom: 12px;
-            color: var(--ios-label);
-        }
-
-        .ios-input::placeholder {
-            color: var(--ios-gray2);
-        }
-
-        .ios-textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            background-color: var(--ios-gray6);
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 12px;
-            resize: vertical;
-            color: var(--ios-label);
+            color: var(--linux-text);
             font-family: inherit;
         }
 
-        .ios-file-input {
+        .linux-input:focus {
+            outline: none;
+            border-color: var(--linux-accent);
+        }
+
+        .linux-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 8px;
+            background-color: var(--linux-bg);
+            border: 1px solid var(--linux-border);
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            resize: vertical;
+            color: var(--linux-text);
+            font-family: inherit;
+        }
+
+        .linux-textarea:focus {
+            outline: none;
+            border-color: var(--linux-accent);
+        }
+
+        .linux-file-input {
             display: none;
         }
 
-        .ios-file-label {
+        .linux-file-label {
             display: block;
             width: 100%;
-            padding: 40px 20px;
-            background-color: var(--ios-gray6);
-            border: 2px dashed var(--ios-gray4);
-            border-radius: 10px;
+            padding: 20px;
+            background-color: var(--linux-bg);
+            border: 2px dashed var(--linux-border);
+            border-radius: 4px;
             text-align: center;
             margin-bottom: 12px;
             cursor: pointer;
         }
 
-        .ios-file-label i {
-            font-size: 32px;
-            color: var(--ios-gray2);
+        .linux-file-label:hover {
+            border-color: var(--linux-accent);
+        }
+
+        .linux-file-label i {
+            font-size: 24px;
+            color: var(--linux-border);
             margin-bottom: 8px;
             display: block;
         }
 
-        .ios-button {
+        .linux-button {
             display: block;
             width: 100%;
-            padding: 14px;
-            background-color: var(--ios-primary);
+            padding: 10px;
+            background-color: var(--linux-accent);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
             margin-bottom: 12px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
 
-        .ios-button:active {
-            background-color: #0056CC;
+        .linux-button:hover {
+            background-color: var(--linux-accent-hover);
         }
 
-        .ios-button.secondary {
-            background-color: var(--ios-gray5);
-            color: var(--ios-label);
+        .linux-button.secondary {
+            background-color: var(--linux-card-bg);
+            color: var(--linux-text);
+            border: 1px solid var(--linux-border);
         }
 
-        .ios-button.secondary:active {
-            background-color: var(--ios-gray4);
+        .linux-button.secondary:hover {
+            background-color: var(--linux-bg);
         }
 
-        .ios-button.warning {
-            background-color: var(--ios-orange);
+        .linux-button.warning {
+            background-color: var(--linux-warning);
         }
 
-        .ios-button.warning:active {
-            background-color: #CC7700;
+        .linux-button.warning:hover {
+            background-color: #e0b874;
         }
 
-        .ios-image-preview {
+        /* Прелоадер изображения */
+        .linux-image-preview {
             width: 100%;
             height: 200px;
-            border-radius: 10px;
+            border-radius: 4px;
             overflow: hidden;
             margin-bottom: 12px;
-            background-color: var(--ios-gray6);
+            background-color: var(--linux-bg);
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 1px solid var(--linux-border);
         }
 
-        .ios-image-preview img {
+        .linux-image-preview img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
 
-        .ios-alert {
-            padding: 12px;
-            border-radius: 10px;
+        /* Уведомления */
+        .linux-alert {
+            padding: 10px;
+            border-radius: 4px;
             margin-bottom: 12px;
             font-size: 14px;
             display: flex;
             align-items: center;
+            border-left: 4px solid;
         }
 
-        .ios-alert i {
+        .linux-alert i {
             margin-right: 8px;
         }
 
-        .ios-alert.success {
-            background-color: rgba(52, 199, 89, 0.15);
-            color: var(--ios-green);
+        .linux-alert.success {
+            background-color: rgba(106, 199, 106, 0.15);
+            color: var(--linux-success);
+            border-left-color: var(--linux-success);
         }
 
-        .ios-alert.error {
-            background-color: rgba(255, 59, 48, 0.15);
-            color: var(--ios-red);
+        .linux-alert.error {
+            background-color: rgba(209, 104, 104, 0.15);
+            color: var(--linux-error);
+            border-left-color: var(--linux-error);
         }
 
-        .ios-alert.info {
-            background-color: rgba(0, 122, 255, 0.15);
-            color: var(--ios-primary);
+        .linux-alert.info {
+            background-color: rgba(74, 140, 190, 0.15);
+            color: var(--linux-accent);
+            border-left-color: var(--linux-accent);
         }
 
-        .ios-alert.warning {
-            background-color: rgba(255, 149, 0, 0.15);
-            color: var(--ios-orange);
+        .linux-alert.warning {
+            background-color: rgba(217, 168, 95, 0.15);
+            color: var(--linux-warning);
+            border-left-color: var(--linux-warning);
         }
 
-        .ios-slider-container {
-            margin-bottom: 20px;
+        /* Слайдеры */
+        .linux-slider-container {
+            margin-bottom: 16px;
         }
 
-        .ios-slider-label {
+        .linux-slider-label {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 14px;
-            color: var(--ios-label);
+            color: var(--linux-text);
         }
 
-        .ios-slider {
+        .linux-slider {
             -webkit-appearance: none;
             width: 100%;
             height: 5px;
-            background: var(--ios-gray4);
+            background: var(--linux-border);
             border-radius: 5px;
             outline: none;
         }
 
-        .ios-slider::-webkit-slider-thumb {
+        .linux-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 22px;
-            height: 22px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background: var(--ios-primary);
+            background: var(--linux-accent);
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--linux-border);
         }
 
-        .ios-toggle {
+        /* Переключатели */
+        .linux-toggle {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        .ios-toggle-label {
-            font-size: 16px;
+        .linux-toggle-label {
+            font-size: 14px;
         }
 
-        .ios-toggle-switch {
+        .linux-toggle-switch {
             position: relative;
             display: inline-block;
-            width: 51px;
-            height: 31px;
+            width: 40px;
+            height: 20px;
         }
 
-        .ios-toggle-switch input {
+        .linux-toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
 
-        .ios-toggle-slider {
+        .linux-toggle-slider {
             position: absolute;
             cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--ios-gray4);
+            background-color: var(--linux-border);
             transition: .4s;
-            border-radius: 34px;
+            border-radius: 20px;
         }
 
-        .ios-toggle-slider:before {
+        .linux-toggle-slider:before {
             position: absolute;
             content: "";
-            height: 27px;
-            width: 27px;
+            height: 16px;
+            width: 16px;
             left: 2px;
             bottom: 2px;
             background-color: white;
@@ -378,109 +379,135 @@
             border-radius: 50%;
         }
 
-        input:checked + .ios-toggle-slider {
-            background-color: var(--ios-primary);
+        input:checked + .linux-toggle-slider {
+            background-color: var(--linux-accent);
         }
 
-        input:checked + .ios-toggle-slider:before {
+        input:checked + .linux-toggle-slider:before {
             transform: translateX(20px);
         }
 
-        .ios-progress-bar {
+        /* Прогресс-бары */
+        .linux-progress-bar {
             width: 100%;
-            height: 5px;
-            background-color: var(--ios-gray5);
+            height: 6px;
+            background-color: var(--linux-border);
             border-radius: 3px;
             overflow: hidden;
             margin: 8px 0;
         }
 
-        .ios-progress {
+        .linux-progress {
             height: 100%;
-            background-color: var(--ios-primary);
+            background-color: var(--linux-accent);
             border-radius: 3px;
             transition: width 0.3s ease;
         }
 
-        .ios-risk-low {
-            color: var(--ios-green);
+        /* Цвета для оценки риска */
+        .linux-risk-low {
+            color: var(--linux-success);
         }
 
-        .ios-risk-medium {
-            color: var(--ios-orange);
+        .linux-risk-medium {
+            color: var(--linux-warning);
         }
 
-        .ios-risk-high {
-            color: var(--ios-red);
+        .linux-risk-high {
+            color: var(--linux-error);
         }
 
-        .ios-tab-content {
+        /* Содержимое вкладок */
+        .linux-tab-content {
             display: none;
         }
 
-        .ios-tab-content.active {
+        .linux-tab-content.active {
             display: block;
         }
 
-        .ios-detail-text {
-            font-size: 14px;
-            color: var(--ios-secondary-label);
+        /* Дополнительный текст */
+        .linux-detail-text {
+            font-size: 13px;
+            color: #999;
             margin-top: 4px;
         }
 
-        .ios-list {
+        /* Списки */
+        .linux-list {
             list-style: none;
         }
 
-        .ios-list-item {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--ios-border);
+        .linux-list-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--linux-border);
         }
 
-        .ios-list-item:last-child {
+        .linux-list-item:last-child {
             border-bottom: none;
         }
 
-        .ios-badge {
+        /* Бейджи */
+        .linux-badge {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
             margin-left: 8px;
         }
 
-        .ios-badge.primary {
-            background-color: rgba(0, 122, 255, 0.15);
-            color: var(--ios-primary);
+        .linux-badge.primary {
+            background-color: rgba(74, 140, 190, 0.2);
+            color: var(--linux-accent);
         }
 
-        .ios-badge.green {
-            background-color: rgba(52, 199, 89, 0.15);
-            color: var(--ios-green);
+        .linux-badge.green {
+            background-color: rgba(106, 199, 106, 0.2);
+            color: var(--linux-success);
         }
 
-        .ios-badge.orange {
-            background-color: rgba(255, 149, 0, 0.15);
-            color: var(--ios-orange);
+        .linux-badge.orange {
+            background-color: rgba(217, 168, 95, 0.2);
+            color: var(--linux-warning);
         }
 
-        .ios-home-indicator {
-            height: 34px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Сетка для элементов управления */
+        .linux-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
 
-        .ios-home-indicator-line {
-            width: 134px;
-            height: 5px;
-            background-color: black;
-            border-radius: 3px;
+        @media (min-width: 768px) {
+            .linux-controls-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        .dark-mode .ios-home-indicator-line {
-            background-color: white;
+        /* Рекомендации */
+        .linux-recommendation {
+            padding: 8px 0;
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* Полоса прокрутки */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--linux-scrollbar);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--linux-scrollbar-thumb);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
         }
 
         /* Анимации */
@@ -502,219 +529,212 @@
             animation: slideIn 0.3s ease;
         }
 
-        /* Адаптивность */
-        @media (min-width: 768px) {
-            .ios-controls-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-        }
-
-        .ios-recommendation {
-            padding: 8px 0;
-            color: var(--ios-secondary-label);
-            font-size: 14px;
+        /* Терминальный стиль для текстовых областей */
+        .terminal-style {
+            background-color: #1e1e1e;
+            color: #d0d0d0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            border: 1px solid #333;
         }
     </style>
 </head>
 <body>
-    <div class="ios-status-bar">
-        <div class="ios-status-bar-time" id="current-time">12:00</div>
+    <div class="linux-header">
+        <div class="linux-title">CryptoStego</div>
+        <div class="linux-window-controls">
+            <div class="linux-control close"></div>
+            <div class="linux-control minimize"></div>
+            <div class="linux-control maximize"></div>
+        </div>
     </div>
 
-    <div class="ios-nav-bar">
-        <button class="ios-nav-button">Настройки</button>
-        <div class="ios-nav-title">CryptoStego</div>
-        <button class="ios-nav-button">Справка</button>
-    </div>
-
-    <div class="ios-container">
-        <div class="ios-card">
-            <div class="ios-segmented-control">
-                <div class="ios-segment active" data-tab="stegano">Стеганография</div>
-                <div class="ios-segment" data-tab="analysis">Анализ</div>
-                <div class="ios-segment" data-tab="detection">Обнаружение</div>
+    <div class="linux-container">
+        <div class="linux-card">
+            <div class="linux-tabs">
+                <div class="linux-tab active" data-tab="stegano">Стеганография</div>
+                <div class="linux-tab" data-tab="analysis">Анализ</div>
+                <div class="linux-tab" data-tab="detection">Обнаружение</div>
             </div>
 
-            <div class="ios-tab-content active" id="stegano-tab">
-                <div class="ios-controls-grid">
-                    <div class="ios-card">
-                        <div class="ios-section-title"><i class="fas fa-lock"></i> Сокрытие сообщения</div>
+            <div class="linux-tab-content active" id="stegano-tab">
+                <div class="linux-controls-grid">
+                    <div class="linux-card">
+                        <div class="linux-card-title"><i class="fas fa-lock"></i> Сокрытие сообщения</div>
                         
-                        <label class="ios-file-label" for="image-input">
+                        <label class="linux-file-label" for="image-input">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <div>Выберите изображение</div>
-                            <div class="ios-detail-text">PNG или JPG, до 10 МБ</div>
+                            <div class="linux-detail-text">PNG или JPG, до 10 МБ</div>
                         </label>
-                        <input type="file" id="image-input" class="ios-file-input" accept="image/*">
+                        <input type="file" id="image-input" class="linux-file-input" accept="image/*">
                         
-                        <div class="ios-image-preview">
+                        <div class="linux-image-preview">
                             <img id="original-image" src="" alt="Оригинальное изображение" style="display: none;">
-                            <i class="fas fa-image" style="font-size: 40px; color: var(--ios-gray3);"></i>
+                            <i class="fas fa-image" style="font-size: 40px; color: #555;"></i>
                         </div>
                         
-                        <textarea class="ios-textarea" id="message" placeholder="Введите текст для скрытия..."></textarea>
+                        <textarea class="linux-textarea terminal-style" id="message" placeholder="Введите текст для скрытия..."></textarea>
                         
-                        <input type="password" class="ios-input" id="password" placeholder="Ключ шифрования">
+                        <input type="password" class="linux-input terminal-style" id="password" placeholder="Ключ шифрования">
                         
-                        <button class="ios-button" id="encode-btn">
+                        <button class="linux-button" id="encode-btn">
                             <i class="fas fa-shield-alt"></i> Скрыть сообщение
                         </button>
                         
-                        <button class="ios-button secondary" id="analyze-btn">
+                        <button class="linux-button secondary" id="analyze-btn">
                             <i class="fas fa-chart-bar"></i> Анализировать изображение
                         </button>
                         
-                        <div id="encode-status" class="ios-alert info" style="display: none;">
+                        <div id="encode-status" class="linux-alert info" style="display: none;">
                             <i class="fas fa-info-circle"></i> Готов к работе
                         </div>
                     </div>
                     
-                    <div class="ios-card">
-                        <div class="ios-section-title"><i class="fas fa-unlock"></i> Извлечение сообщения</div>
+                    <div class="linux-card">
+                        <div class="linux-card-title"><i class="fas fa-unlock"></i> Извлечение сообщения</div>
                         
-                        <label class="ios-file-label" for="stego-image-input">
+                        <label class="linux-file-label" for="stego-image-input">
                             <i class="fas fa-file-image"></i>
                             <div>Выберите изображение</div>
-                            <div class="ios-detail-text">Содержащее скрытое сообщение</div>
+                            <div class="linux-detail-text">Содержащее скрытое сообщение</div>
                         </label>
-                        <input type="file" id="stego-image-input" class="ios-file-input" accept="image/*">
+                        <input type="file" id="stego-image-input" class="linux-file-input" accept="image/*">
                         
-                        <input type="password" class="ios-input" id="decode-password" placeholder="Ключ шифрования">
+                        <input type="password" class="linux-input terminal-style" id="decode-password" placeholder="Ключ шифрования">
                         
-                        <button class="ios-button" id="decode-btn">
+                        <button class="linux-button" id="decode-btn">
                             <i class="fas fa-search"></i> Извлечь сообщение
                         </button>
                         
-                        <textarea class="ios-textarea" id="decoded-message" readonly placeholder="Извлеченное сообщение появится здесь"></textarea>
+                        <textarea class="linux-textarea terminal-style" id="decoded-message" readonly placeholder="Извлеченное сообщение появится здесь"></textarea>
                         
-                        <div id="decode-status" class="ios-alert info" style="display: none;">
+                        <div id="decode-status" class="linux-alert info" style="display: none;">
                             <i class="fas fa-info-circle"></i> Ожидание изображения
                         </div>
                     </div>
                 </div>
                 
-                <div class="ios-card">
-                    <div class="ios-section-title"><i class="fas fa-sliders-h"></i> Расширенные настройки</div>
+                <div class="linux-card">
+                    <div class="linux-card-title"><i class="fas fa-sliders-h"></i> Расширенные настройки</div>
                     
-                    <div class="ios-slider-container">
-                        <div class="ios-slider-label">
+                    <div class="linux-slider-container">
+                        <div class="linux-slider-label">
                             <span>Глубина внедрения: <span id="bit-depth-value">1</span> бит</span>
-                            <span class="ios-detail-text">Скрытность ↔ Вместимость</span>
+                            <span class="linux-detail-text">Скрытность ↔ Вместимость</span>
                         </div>
-                        <input type="range" min="1" max="4" value="1" class="ios-slider" id="bit-depth">
+                        <input type="range" min="1" max="4" value="1" class="linux-slider" id="bit-depth">
                     </div>
                     
-                    <div class="ios-slider-container">
-                        <div class="ios-slider-label">
+                    <div class="linux-slider-container">
+                        <div class="linux-slider-label">
                             <span>Уровень шума: <span id="noise-level-value">10</span>%</span>
-                            <span class="ios-detail-text">Маскировка ↔ Качество</span>
+                            <span class="linux-detail-text">Маскировка ↔ Качество</span>
                         </div>
-                        <input type="range" min="0" max="100" value="10" class="ios-slider" id="noise-level">
+                        <input type="range" min="0" max="100" value="10" class="linux-slider" id="noise-level">
                     </div>
                     
-                    <div class="ios-toggle">
-                        <span class="ios-toggle-label">Адаптивное внедрение</span>
-                        <label class="ios-toggle-switch">
+                    <div class="linux-toggle">
+                        <span class="linux-toggle-label">Адаптивное внедрение</span>
+                        <label class="linux-toggle-switch">
                             <input type="checkbox" id="adaptive-embedding" checked>
-                            <span class="ios-toggle-slider"></span>
+                            <span class="linux-toggle-slider"></span>
                         </label>
                     </div>
                     
-                    <div class="ios-toggle">
-                        <span class="ios-toggle-label">Случайное распределение</span>
-                        <label class="ios-toggle-switch">
+                    <div class="linux-toggle">
+                        <span class="linux-toggle-label">Случайное распределение</span>
+                        <label class="linux-toggle-switch">
                             <input type="checkbox" id="random-distribution" checked>
-                            <span class="ios-toggle-slider"></span>
+                            <span class="linux-toggle-slider"></span>
                         </label>
                     </div>
                     
-                    <div class="ios-toggle">
-                        <span class="ios-toggle-label">Защита от анализа</span>
-                        <label class="ios-toggle-switch">
+                    <div class="linux-toggle">
+                        <span class="linux-toggle-label">Защита от анализа</span>
+                        <label class="linux-toggle-switch">
                             <input type="checkbox" id="anti-analysis" checked>
-                            <span class="ios-toggle-slider"></span>
+                            <span class="linux-toggle-slider"></span>
                         </label>
                     </div>
                 </div>
             </div>
             
-            <div class="ios-tab-content" id="analysis-tab">
-                <div class="ios-card">
-                    <div class="ios-section-title"><i class="fas fa-shield-alt"></i> Анализ стойкости</div>
+            <div class="linux-tab-content" id="analysis-tab">
+                <div class="linux-card">
+                    <div class="linux-card-title"><i class="fas fa-shield-alt"></i> Анализ стойкости</div>
                     
-                    <label class="ios-file-label" for="analysis-image">
+                    <label class="linux-file-label" for="analysis-image">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <div>Выберите изображение для анализа</div>
                     </label>
-                    <input type="file" id="analysis-image" class="ios-file-input" accept="image/*">
+                    <input type="file" id="analysis-image" class="linux-file-input" accept="image/*">
                     
-                    <div class="ios-segmented-control">
-                        <div class="ios-segment active" data-analysis="histogram">Гистограммы</div>
-                        <div class="ios-segment" data-analysis="chi2">Хи-квадрат</div>
-                        <div class="ios-segment" data-analysis="rs">RS-анализ</div>
-                        <div class="ios-segment" data-analysis="noise">Шум</div>
+                    <div class="linux-tabs" style="margin-top: 16px;">
+                        <div class="linux-tab active" data-analysis="histogram">Гистограммы</div>
+                        <div class="linux-tab" data-analysis="chi2">Хи-квадрат</div>
+                        <div class="linux-tab" data-analysis="rs">RS-анализ</div>
+                        <div class="linux-tab" data-analysis="noise">Шум</div>
                     </div>
                     
-                    <button class="ios-button" id="start-analysis">
+                    <button class="linux-button" id="start-analysis">
                         <i class="fas fa-play"></i> Запустить анализ
                     </button>
                     
-                    <div class="ios-section-title" style="margin-top: 20px;"><i class="fas fa-chart-line"></i> Результаты анализа</div>
+                    <div class="linux-card-title" style="margin-top: 20px;"><i class="fas fa-chart-line"></i> Результаты анализа</div>
                     
-                    <div class="ios-list">
-                        <div class="ios-list-item">
+                    <div class="linux-list">
+                        <div class="linux-list-item">
                             <div>Обнаружение LSB-внедрения</div>
-                            <div class="ios-detail-text">Анализ младших значащих битов</div>
-                            <div class="ios-risk-low" id="lsb-result">Не проверено</div>
-                            <div class="ios-progress-bar">
-                                <div class="ios-progress" id="lsb-progress" style="width: 0%"></div>
+                            <div class="linux-detail-text">Анализ младших значащих битов</div>
+                            <div class="linux-risk-low" id="lsb-result">Не проверено</div>
+                            <div class="linux-progress-bar">
+                                <div class="linux-progress" id="lsb-progress" style="width: 0%"></div>
                             </div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Статистические аномалии</div>
-                            <div class="ios-detail-text">Отклонения от нормального распределения</div>
-                            <div class="ios-risk-low" id="stats-result">Не проверено</div>
-                            <div class="ios-progress-bar">
-                                <div class="ios-progress" id="stats-progress" style="width: 0%"></div>
+                            <div class="linux-detail-text">Отклонения от нормального распределения</div>
+                            <div class="linux-risk-low" id="stats-result">Не проверено</div>
+                            <div class="linux-progress-bar">
+                                <div class="linux-progress" id="stats-progress" style="width: 0%"></div>
                             </div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Анализ гистограммы</div>
-                            <div class="ios-detail-text">Распределение цветовых значений</div>
-                            <div class="ios-risk-low" id="histogram-result">Не проверено</div>
-                            <div class="ios-progress-bar">
-                                <div class="ios-progress" id="histogram-progress" style="width: 0%"></div>
+                            <div class="linux-detail-text">Распределение цветовых значений</div>
+                            <div class="linux-risk-low" id="histogram-result">Не проверено</div>
+                            <div class="linux-progress-bar">
+                                <div class="linux-progress" id="histogram-progress" style="width: 0%"></div>
                             </div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Анализ шумовых характеристик</div>
-                            <div class="ios-detail-text">Отклонения в шумовой модели</div>
-                            <div class="ios-risk-low" id="noise-result">Не проверено</div>
-                            <div class="ios-progress-bar">
-                                <div class="ios-progress" id="noise-progress" style="width: 0%"></div>
+                            <div class="linux-detail-text">Отклонения в шумовой модели</div>
+                            <div class="linux-risk-low" id="noise-result">Не проверено</div>
+                            <div class="linux-progress-bar">
+                                <div class="linux-progress" id="noise-progress" style="width: 0%"></div>
                             </div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Стойкость к атакам</div>
-                            <div class="ios-detail-text">Устойчивость к методам обнаружения</div>
-                            <div class="ios-risk-low" id="resistance-result">Не проверено</div>
-                            <div class="ios-progress-bar">
-                                <div class="ios-progress" id="resistance-progress" style="width: 0%"></div>
+                            <div class="linux-detail-text">Устойчивость к методам обнаружения</div>
+                            <div class="linux-risk-low" id="resistance-result">Не проверено</div>
+                            <div class="linux-progress-bar">
+                                <div class="linux-progress" id="resistance-progress" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="ios-alert info" style="margin-top: 16px;">
+                    <div class="linux-alert info" style="margin-top: 16px;">
                         <i class="fas fa-lightbulb"></i> 
-                        <div>Общая оценка стойкости: <span id="overall-score" class="ios-risk-low">Не проверено</span></div>
-                        <div class="ios-progress-bar">
-                            <div class="ios-progress" id="overall-progress" style="width: 0%"></div>
+                        <div>Общая оценка стойкости: <span id="overall-score" class="linux-risk-low">Не проверено</span></div>
+                        <div class="linux-progress-bar">
+                            <div class="linux-progress" id="overall-progress" style="width: 0%"></div>
                         </div>
                     </div>
                     
@@ -722,73 +742,73 @@
                 </div>
             </div>
             
-            <div class="ios-tab-content" id="detection-tab">
-                <div class="ios-card">
-                    <div class="ios-section-title"><i class="fas fa-search"></i> Методы обнаружения</div>
+            <div class="linux-tab-content" id="detection-tab">
+                <div class="linux-card">
+                    <div class="linux-card-title"><i class="fas fa-search"></i> Методы обнаружения</div>
                     
-                    <div class="ios-list">
-                        <div class="ios-list-item">
+                    <div class="linux-list">
+                        <div class="linux-list-item">
                             <div>Статистический анализ</div>
-                            <div class="ios-detail-text">Выявление аномалии в распределении значений пикселей</div>
-                            <span class="ios-badge primary">Высокая точность</span>
+                            <div class="linux-detail-text">Выявление аномалии в распределении значений пикселей</div>
+                            <span class="linux-badge primary">Высокая точность</span>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Анализ гистограмм</div>
-                            <div class="ios-detail-text">Сравнение распределения цветовых характеристик</div>
-                            <span class="ios-badge green">Для LSB</span>
+                            <div class="linux-detail-text">Сравнение распределения цветовых характеристик</div>
+                            <span class="linux-badge green">Для LSB</span>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Хи-квадрат тест</div>
-                            <div class="ios-detail-text">Обнаружение LSB-стеганографии по равномерности пар значений</div>
-                            <span class="ios-badge orange">Средняя точность</span>
+                            <div class="linux-detail-text">Обнаружение LSB-стеганографии по равномерности пар значений</div>
+                            <span class="linux-badge orange">Средняя точность</span>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>RS-анализ</div>
-                            <div class="ios-detail-text">Классификация групп пикселей и анализ их регулярности</div>
+                            <div class="linux-detail-text">Классификация групп пикселей и анализ их регулярности</div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Анализ шумовых характеристик</div>
-                            <div class="ios-detail-text">Исследование уровня шума и выявление аномалий</div>
+                            <div class="linux-detail-text">Исследование уровня шума и выявление аномалий</div>
                         </div>
                         
-                        <div class="ios-list-item">
+                        <div class="linux-list-item">
                             <div>Машинное обучение</div>
-                            <div class="ios-detail-text">Использование обученных классификаторов для обнаружения</div>
-                            <span class="ios-badge primary">Современный метод</span>
+                            <div class="linux-detail-text">Использование обученных классификаторов для обнаружения</div>
+                            <span class="linux-badge primary">Современный метод</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="ios-card">
-                    <div class="ios-section-title"><i class="fas fa-lightbulb"></i> Рекомендации по скрытности</div>
+                <div class="linux-card">
+                    <div class="linux-card-title"><i class="fas fa-lightbulb"></i> Рекомендации по скрытности</div>
                     
-                    <div class="ios-list">
-                        <div class="ios-list-item">
-                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                    <div class="linux-list">
+                        <div class="linux-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--linux-success); margin-right: 10px;"></i>
                             <div>Используйте адаптивные методы внедрения</div>
                         </div>
                         
-                        <div class="ios-list-item">
-                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                        <div class="linux-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--linux-success); margin-right: 10px;"></i>
                             <div>Ограничивайте объем данных (5-10% от емкости)</div>
                         </div>
                         
-                        <div class="ios-list-item">
-                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                        <div class="linux-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--linux-success); margin-right: 10px;"></i>
                             <div>Применяйте криптографическое преобразование</div>
                         </div>
                         
-                        <div class="ios-list-item">
-                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                        <div class="linux-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--linux-success); margin-right: 10px;"></i>
                             <div>Используйте текстурные области для внедрения</div>
                         </div>
                         
-                        <div class="ios-list-item">
-                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                        <div class="linux-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--linux-success); margin-right: 10px;"></i>
                             <div>Сохраняйте статистические характеристики</div>
                         </div>
                     </div>
@@ -797,26 +817,12 @@
         </div>
     </div>
 
-    <div class="ios-home-indicator">
-        <div class="ios-home-indicator-line"></div>
-    </div>
-
     <script>
-        // Обновление времени в статус-баре
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
-            document.getElementById('current-time').textContent = timeStr;
-        }
-        
-        setInterval(updateTime, 60000);
-        updateTime();
-        
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
             // Управление табами
-            const tabs = document.querySelectorAll('.ios-segment');
-            const tabContents = document.querySelectorAll('.ios-tab-content');
+            const tabs = document.querySelectorAll('.linux-tab');
+            const tabContents = document.querySelectorAll('.linux-tab-content');
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -855,7 +861,7 @@
             });
             
             // Обработка выбора файлов
-            const fileInputs = document.querySelectorAll('.ios-file-input');
+            const fileInputs = document.querySelectorAll('.linux-file-input');
             fileInputs.forEach(input => {
                 const label = input.previousElementSibling;
                 
@@ -902,27 +908,27 @@
                 
                 if (!imageInput.files[0]) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
                     return;
                 }
                 
                 if (!messageInput.value) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите сообщение';
                     return;
                 }
                 
                 if (!passwordInput.value) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите ключ шифрования';
                     return;
                 }
                 
                 status.style.display = 'flex';
-                status.className = 'ios-alert info';
+                status.className = 'linux-alert info';
                 status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс скрытия сообщения...';
                 
                 try {
@@ -982,10 +988,10 @@
                     link.href = resultImage;
                     link.click();
                     
-                    status.className = 'ios-alert success';
+                    status.className = 'linux-alert success';
                     status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно скрыто! Файл сохранен.';
                 } catch (error) {
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
                 }
             });
@@ -998,20 +1004,20 @@
                 
                 if (!imageInput.files[0]) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
                     return;
                 }
                 
                 if (!passwordInput.value) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите ключ шифрования';
                     return;
                 }
                 
                 status.style.display = 'flex';
-                status.className = 'ios-alert info';
+                status.className = 'linux-alert info';
                 status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс извлечения сообщения...';
                 
                 try {
@@ -1023,8 +1029,8 @@
                     const imageFile = imageInput.files[0];
                     const imageData = await loadImageData(imageFile);
                     
-                    // Генерируем позиции для извлечения
-                    const estimatedBits = (imageData.width * imageData.height * 3 * bitsPerChannel) - 32;
+                    // Генерируем позиции для извлечения (оцениваем максимально возможное количество)
+                    const estimatedBits = imageData.width * imageData.height * 3 * bitsPerChannel;
                     const positions = generatePositions(imageData, estimatedBits, useRandom ? passwordInput.value : null);
                     
                     // Извлекаем биты
@@ -1062,10 +1068,10 @@
                     const decryptedMessage = await decryptMessage(bytes, passwordInput.value);
                     document.getElementById('decoded-message').value = decryptedMessage;
                     
-                    status.className = 'ios-alert success';
+                    status.className = 'linux-alert success';
                     status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно извлечено!';
                 } catch (error) {
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
                 }
             });
@@ -1077,13 +1083,13 @@
                 
                 if (!imageInput.files[0]) {
                     status.style.display = 'flex';
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
                     return;
                 }
                 
                 status.style.display = 'flex';
-                status.className = 'ios-alert info';
+                status.className = 'linux-alert info';
                 status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Анализирую текстуру изображения...';
                 
                 try {
@@ -1112,10 +1118,10 @@
                     textureCtx.putImageData(textureImageData, 0, 0);
                     document.getElementById('original-image').src = textureCanvas.toDataURL();
                     
-                    status.className = 'ios-alert success';
+                    status.className = 'linux-alert success';
                     status.innerHTML = '<i class="fas fa-check-circle"></i> Анализ завершен. Светлые области лучше подходят для внедрения.';
                 } catch (error) {
-                    status.className = 'ios-alert error';
+                    status.className = 'linux-alert error';
                     status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
                 }
             });
@@ -1178,7 +1184,7 @@
                     let counter = 0;
                     const usedPositions = new Set();
                     
-                    while (positions.length < length) {
+                    while (positions.length < Math.min(length, totalPixels)) {
                         // Генерируем хеш на основе seed и счетчика
                         const hash = simpleHash(seed + counter.toString());
                         const position = Math.abs(hash) % totalPixels;
@@ -1189,11 +1195,13 @@
                         }
                         
                         counter++;
-                        if (counter > 10000) break; // Защита от бесконечного цикла
+                        // Защита от бесконечного цикла - ограничиваем максимальным количеством пикселей
+                        if (counter > totalPixels * 2) break;
                     }
                 } else {
                     // Последовательное распределение
-                    for (let i = 0; i < length; i++) {
+                    const maxPositions = Math.min(length, totalPixels);
+                    for (let i = 0; i < maxPositions; i++) {
                         positions.push(i % totalPixels);
                     }
                 }
@@ -1292,6 +1300,7 @@
                 const width = imageData.width;
                 const extractedBits = [];
                 
+                // Извлекаем биты в правильном порядке
                 for (let i = 0; i < positions.length; i++) {
                     const pos = positions[i];
                     const x = pos % width;
@@ -1303,14 +1312,14 @@
                         for (let bit = 0; bit < bitsPerChannel; bit++) {
                             const bitValue = (channelValue >> bit) & 1;
                             extractedBits.push(bitValue);
-                            
-                            // Проверяем на окончание сообщения (32 нулевых бита)
-                            if (extractedBits.length >= 32) {
-                                const last32Bits = extractedBits.slice(-32);
-                                if (last32Bits.every(bit => bit === 0)) {
-                                    return extractedBits;
-                                }
-                            }
+                        }
+                    }
+                    
+                    // Проверяем на окончание сообщения (32 нулевых бита)
+                    if (extractedBits.length >= 32) {
+                        const last32Bits = extractedBits.slice(-32);
+                        if (last32Bits.every(bit => bit === 0)) {
+                            return extractedBits.slice(0, -32); // Убираем маркер конца
                         }
                     }
                 }
@@ -1582,32 +1591,32 @@
                     document.getElementById('overall-progress').style.width = `${overallScore}%`;
                     
                     if (overallScore >= 80) {
-                        document.getElementById('overall-score').className = 'ios-risk-high';
+                        document.getElementById('overall-score').className = 'linux-risk-high';
                     } else if (overallScore >= 50) {
-                        document.getElementById('overall-score').className = 'ios-risk-medium';
+                        document.getElementById('overall-score').className = 'linux-risk-medium';
                     } else {
-                        document.getElementById('overall-score').className = 'ios-risk-low';
+                        document.getElementById('overall-score').className = 'linux-risk-low';
                     }
                     
                     // Рекомендации
                     let recommendations = '';
                     if (overallScore < 40) {
                         recommendations = `
-                            <div class="ios-recommendation">Используйте адаптивное внедрение для лучшей маскировки</div>
-                            <div class="ios-recommendation">Уменьшите глубину внедрения до 1-2 бит на канал</div>
-                            <div class="ios-recommendation">Добавьте маскирующий шум (15-25%)</div>
-                            <div class="ios-recommendation">Включите защиту от стегоанализа</div>
+                            <div class="linux-recommendation">Используйте адаптивное внедрение для лучшей маскировки</div>
+                            <div class="linux-recommendation">Уменьшите глубину внедрения до 1-2 бит на канал</div>
+                            <div class="linux-recommendation">Добавьте маскирующий шум (15-25%)</div>
+                            <div class="linux-recommendation">Включите защиту от стегоанализа</div>
                         `;
                     } else if (overallScore < 70) {
                         recommendations = `
-                            <div class="ios-recommendation">Используйте случайное распределение данных</div>
-                            <div class="ios-recommendation">Добавьте маскирующий шум (10-15%)</div>
-                            <div class="ios-recommendation">Ограничьте объем скрываемых данных</div>
+                            <div class="linux-recommendation">Используйте случайное распределение данных</div>
+                            <div class="linux-recommendation">Добавьте маскирующий шум (10-15%)</div>
+                            <div class="linux-recommendation">Ограничьте объем скрываемых данных</div>
                         `;
                     } else {
                         recommendations = `
-                            <div class="ios-recommendation">Отличная стойкость! Продолжайте использовать текущие настройки</div>
-                            <div class="ios-recommendation">Рассмотрите возможность использования DCT-метода для JPEG</div>
+                            <div class="linux-recommendation">Отличная стойкость! Продолжайте использовать текущие настройки</div>
+                            <div class="linux-recommendation">Рассмотрите возможность использования DCT-метода для JPEG</div>
                         `;
                     }
                     
@@ -1827,11 +1836,11 @@
                     progressBar.style.width = `${progress}%`;
                     
                     if (value >= 80) {
-                        element.className = 'ios-risk-high';
+                        element.className = 'linux-risk-high';
                     } else if (value >= 50) {
-                        element.className = 'ios-risk-medium';
+                        element.className = 'linux-risk-medium';
                     } else {
-                        element.className = 'ios-risk-low';
+                        element.className = 'linux-risk-low';
                     }
                 }, 500);
             }
