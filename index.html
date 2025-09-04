@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Омофонический шифратор 2байт→2байт</title>
+    <title>Омофонический шифратор с разделением байтов</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -42,7 +42,7 @@
             font-weight: bold;
             color: #00ff00;
         }
-        input, textarea, button {
+        input, textarea, button, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #00ff00;
@@ -108,13 +108,21 @@
             border-radius: 5px;
             border: 1px solid #00ff00;
         }
-        .coord-pair {
+        .byte-pair {
             display: flex;
             justify-content: space-between;
             margin: 5px 0;
             padding: 5px;
             background: #222;
             border-radius: 3px;
+            font-size: 12px;
+        }
+        .process-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
         }
         
         @media (max-width: 768px) {
@@ -126,7 +134,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Омофонический шифратор 2байт→2байт</h1>
+        <h1>🔐 Омофонический шифратор с разделением байтов</h1>
         
         <div class="panel">
             <h2>⚙️ Настройки ключа</h2>
@@ -145,11 +153,11 @@
             <h2>📝 Ввод текста</h2>
             <div class="input-group">
                 <label for="inputText">Исходный текст:</label>
-                <textarea id="inputText" placeholder="Введите текст для шифрования...">Hello World!</textarea>
+                <textarea id="inputText" placeholder="Введите текст для шифрования...">Hello World! Привет мир!</textarea>
             </div>
             <div class="input-group">
-                <label for="encryptedText">Зашифрованный текст (HEX):</label>
-                <textarea id="encryptedText" placeholder="Здесь появится зашифрованный текст в HEX..."></textarea>
+                <label for="paddingChar">Символ дополнения:</label>
+                <input type="text" id="paddingChar" value="·" maxlength="1" placeholder="Символ для дополнения">
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <button onclick="encryptText()" style="background: #ff9900;">🔒 Зашифровать</button>
@@ -160,20 +168,37 @@
         <div id="status" class="status warning">Статус: Бокс не инициализирован</div>
 
         <div class="result-area">
-            <h2>👁️ Визуализация преобразований</h2>
+            <h2>👁️ Визуализация процесса</h2>
+            
+            <div class="process-step" id="preparationStep">
+                <h3>📋 Подготовка текста</h3>
+                <div id="preparationVis">Ожидание данных...</div>
+            </div>
+
             <div class="visualization">
                 <div class="vis-box">
-                    <h3>📊 Шифрование</h3>
-                    <div id="encryptionVis">Ожидание данных...</div>
+                    <h3>🔢 Верхние байты (128-255)</h3>
+                    <div id="upperBytesVis">Ожидание данных...</div>
                 </div>
                 <div class="vis-box">
-                    <h3>📊 Дешифрование</h3>
-                    <div id="decryptionVis">Ожидание данных...</div>
+                    <h3>🔢 Нижние байты (0-127)</h3>
+                    <div id="lowerBytesVis">Ожидание данных...</div>
                 </div>
             </div>
-            
-            <h3>🔢 HEX представление</h3>
-            <div class="hex-view" id="hexView">Ожидание данных...</div>
+
+            <div class="process-step" id="encryptionStep">
+                <h3>🔐 Процесс шифрования</h3>
+                <div id="encryptionVis">Ожидание данных...</div>
+            </div>
+
+            <div class="process-step" id="resultStep">
+                <h3>📊 Результат</h3>
+                <div class="input-group">
+                    <label for="encryptedText">Зашифрованный текст (HEX):</label>
+                    <textarea id="encryptedText" placeholder="Здесь появится зашифрованный текст в HEX..."></textarea>
+                </div>
+                <div class="hex-view" id="hexView">Ожидание данных...</div>
+            </div>
             
             <h3>📋 История операций</h3>
             <div class="hex-view" id="history">Ожидание операций...</div>
@@ -204,10 +229,10 @@
             }
 
             async createBox(key) {
-                // Создаем 128x128 ячеек
                 this.box = new Array(256);
                 this.reverseMap = new Map();
                 
+                // Заполняем только нужный диапазон (128-255 для X, 0-127 для Y)
                 for (let x = 128; x < 256; x++) {
                     this.box[x] = new Array(128);
                     for (let y = 0; y < 128; y++) {
@@ -228,7 +253,6 @@
             }
 
             generateOmoфон(x, y, index, key) {
-                // Детерминистическая генерация омофона на основе координат и ключа
                 const data = new TextEncoder().encode(`${x}-${y}-${index}`);
                 let hash = 0;
                 
@@ -275,36 +299,59 @@
             }
 
             bytesToHex(bytes) {
-                return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
             }
 
-            textToCoords(text) {
+            prepareText(text, paddingChar = '·') {
                 const bytes = new TextEncoder().encode(text);
-                const coords = [];
+                const upperBytes = [];
+                const lowerBytes = [];
                 
-                for (let i = 0; i < bytes.length; i += 2) {
-                    const x = bytes[i];
-                    const y = i + 1 < bytes.length ? bytes[i + 1] : 0;
-                    coords.push({ x, y });
+                // Разделяем на верхние и нижние байты
+                for (let i = 0; i < bytes.length; i++) {
+                    if (i % 2 === 0) {
+                        upperBytes.push(bytes[i]);
+                    } else {
+                        lowerBytes.push(bytes[i]);
+                    }
                 }
                 
-                return coords;
+                // Добавляем padding если нужно
+                if (upperBytes.length > lowerBytes.length) {
+                    const paddingByte = new TextEncoder().encode(paddingChar)[0];
+                    lowerBytes.push(paddingByte);
+                }
+                
+                return { upperBytes, lowerBytes, originalLength: bytes.length };
             }
 
-            coordsToText(coords) {
-                const bytes = new Uint8Array(coords.length * 2);
+            reconstructText(upperBytes, lowerBytes, originalLength, paddingChar = '·') {
+                const bytes = new Uint8Array(originalLength);
+                const paddingByte = new TextEncoder().encode(paddingChar)[0];
                 
-                coords.forEach((coord, index) => {
-                    bytes[index * 2] = coord.x;
-                    bytes[index * 2 + 1] = coord.y;
-                });
+                for (let i = 0; i < originalLength; i++) {
+                    if (i % 2 === 0) {
+                        bytes[i] = upperBytes[Math.floor(i / 2)];
+                    } else {
+                        bytes[i] = lowerBytes[Math.floor(i / 2)];
+                    }
+                }
                 
-                return new TextDecoder().decode(bytes);
+                // Убираем padding
+                let text = new TextDecoder().decode(bytes);
+                if (text.endsWith(paddingChar)) {
+                    text = text.slice(0, -1);
+                }
+                
+                return text;
             }
         }
 
         const cipher = new OmoCipher();
         let operationHistory = [];
+        let currentUpperBytes = [];
+        let currentLowerBytes = [];
+        let currentOriginalLength = 0;
 
         async function initializeBox() {
             const passphrase = document.getElementById('passphrase').value;
@@ -327,37 +374,82 @@
             }
 
             const text = document.getElementById('inputText').value;
+            const paddingChar = document.getElementById('paddingChar').value || '·';
+            
             if (!text) {
                 updateStatus('Введите текст для шифрования', 'error');
                 return;
             }
 
             try {
-                const coords = cipher.textToCoords(text);
-                const encrypted = [];
-                let hexOutput = '';
-                let visHtml = '';
+                // 1. Подготовка текста
+                const preparation = cipher.prepareText(text, paddingChar);
+                currentUpperBytes = preparation.upperBytes;
+                currentLowerBytes = preparation.lowerBytes;
+                currentOriginalLength = preparation.originalLength;
 
-                coords.forEach(coord => {
-                    const result = cipher.encrypt(coord.x, coord.y);
+                // Визуализация подготовки
+                let prepHtml = `
+                    <div>Исходная длина: ${preparation.originalLength} байт</div>
+                    <div>Верхних байтов: ${preparation.upperBytes.length}</div>
+                    <div>Нижних байтов: ${preparation.lowerBytes.length}</div>
+                `;
+                
+                if (preparation.upperBytes.length !== preparation.lowerBytes.length) {
+                    prepHtml += `<div>Добавлен padding: "${paddingChar}"</div>`;
+                }
+                
+                document.getElementById('preparationVis').innerHTML = prepHtml;
+
+                // 2. Визуализация байтов
+                let upperHtml = '';
+                let lowerHtml = '';
+                
+                preparation.upperBytes.forEach((byte, index) => {
+                    upperHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                preparation.lowerBytes.forEach((byte, index) => {
+                    lowerHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                document.getElementById('upperBytesVis').innerHTML = upperHtml;
+                document.getElementById('lowerBytesVis').innerHTML = lowerHtml;
+
+                // 3. Шифрование
+                const encrypted = [];
+                let encHtml = '';
+                
+                for (let i = 0; i < preparation.upperBytes.length; i++) {
+                    const upperByte = preparation.upperBytes[i];
+                    const lowerByte = preparation.lowerBytes[i];
+                    
+                    const result = cipher.encrypt(upperByte, lowerByte);
                     encrypted.push(result.value);
                     
-                    hexOutput += result.value.toString(16).padStart(4, '0') + ' ';
-                    visHtml += `
-                        <div class="coord-pair">
-                            <span>(${coord.x},${coord.y})</span>
-                            <span>→</span>
-                            <span>0x${result.value.toString(16).padStart(4, '0')}</span>
-                        </div>
-                    `;
-                });
-
-                document.getElementById('encryptedText').value = hexOutput.trim();
-                document.getElementById('encryptionVis').innerHTML = visHtml;
+                    encHtml += `<div class="byte-pair">
+                        <span>(${upperByte},${lowerByte})</span>
+                        <span>→</span>
+                        <span>0x${result.value.toString(16).padStart(4, '0')}</span>
+                    </div>`;
+                }
+                
+                document.getElementById('encryptionVis').innerHTML = encHtml;
+                
+                // 4. Результат
+                const hexOutput = encrypted.map(val => val.toString(16).padStart(4, '0')).join(' ');
+                document.getElementById('encryptedText').value = hexOutput;
                 document.getElementById('hexView').textContent = `HEX: ${hexOutput}`;
                 
                 addToHistory(`Зашифровано: "${text}" -> ${hexOutput}`);
                 updateStatus('Текст успешно зашифрован!', 'success');
+
             } catch (error) {
                 updateStatus('Ошибка шифрования: ' + error.message, 'error');
             }
@@ -370,6 +462,8 @@
             }
 
             const hexText = document.getElementById('encryptedText').value;
+            const paddingChar = document.getElementById('paddingChar').value || '·';
+            
             if (!hexText) {
                 updateStatus('Введите HEX для расшифрования', 'error');
                 return;
@@ -377,32 +471,55 @@
 
             try {
                 const hexValues = hexText.trim().split(/\s+/);
-                const coords = [];
-                let visHtml = '';
-                let decryptedText = '';
+                const upperBytes = [];
+                const lowerBytes = [];
+                let decHtml = '';
 
                 hexValues.forEach(hex => {
                     const value = parseInt(hex, 16);
                     if (isNaN(value)) throw new Error('Неверный HEX формат');
                     
                     const coord = cipher.decrypt(value);
-                    coords.push(coord);
+                    upperBytes.push(coord.x);
+                    lowerBytes.push(coord.y);
                     
-                    visHtml += `
-                        <div class="coord-pair">
-                            <span>0x${hex.padStart(4, '0')}</span>
-                            <span>→</span>
-                            <span>(${coord.x},${coord.y})</span>
-                        </div>
-                    `;
+                    decHtml += `<div class="byte-pair">
+                        <span>0x${hex.padStart(4, '0')}</span>
+                        <span>→</span>
+                        <span>(${coord.x},${coord.y})</span>
+                    </div>`;
                 });
 
-                decryptedText = cipher.coordsToText(coords);
+                document.getElementById('encryptionVis').innerHTML = decHtml;
+
+                // Восстанавливаем текст
+                const decryptedText = cipher.reconstructText(upperBytes, lowerBytes, currentOriginalLength, paddingChar);
                 document.getElementById('inputText').value = decryptedText;
-                document.getElementById('decryptionVis').innerHTML = visHtml;
+                
+                // Визуализация восстановленных байтов
+                let upperHtml = '';
+                let lowerHtml = '';
+                
+                upperBytes.forEach((byte, index) => {
+                    upperHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                lowerBytes.forEach((byte, index) => {
+                    lowerHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                document.getElementById('upperBytesVis').innerHTML = upperHtml;
+                document.getElementById('lowerBytesVis').innerHTML = lowerHtml;
                 
                 addToHistory(`Расшифровано: ${hexText} -> "${decryptedText}"`);
                 updateStatus('Текст успешно расшифрован!', 'success');
+
             } catch (error) {
                 updateStatus('Ошибка расшифрования: ' + error.message, 'error');
             }
