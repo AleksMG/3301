@@ -3,764 +3,813 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профессиональная стеганография с анализом криптостойкости</title>
+    <title>CryptoStego — iOS Style</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --light-color: #ecf0f1;
-            --dark-color: #1a1a1a;
+            --ios-bg: #F2F2F7;
+            --ios-card-bg: #FFFFFF;
+            --ios-primary: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-purple: #AF52DE;
+            --ios-gray1: #8E8E93;
+            --ios-gray2: #AEAEB2;
+            --ios-gray3: #C7C7CC;
+            --ios-gray4: #D1D1D6;
+            --ios-gray5: #E5E5EA;
+            --ios-gray6: #F2F2F7;
+            --ios-label: #000000;
+            --ios-secondary-label: rgba(60, 60, 67, 0.6);
+            --ios-system-materials: rgba(250, 250, 250, 0.93);
+            --ios-border: rgba(0, 0, 0, 0.1);
+            --ios-shadow: rgba(0, 0, 0, 0.1);
         }
-        
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ios-bg: #000000;
+                --ios-card-bg: #1C1C1E;
+                --ios-label: #FFFFFF;
+                --ios-secondary-label: rgba(235, 235, 245, 0.6);
+                --ios-system-materials: rgba(30, 30, 30, 0.93);
+                --ios-border: rgba(255, 255, 255, 0.1);
+                --ios-shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
-        
+
         body {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
-            color: var(--light-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--ios-label);
+            line-height: 1.4;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        .ios-status-bar {
+            height: 44px;
+            background-color: var(--ios-card-bg);
+            display: flex;
+            justify-content: center;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--ios-border);
+            padding: 0 16px;
         }
-        
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            background: rgba(30, 30, 30, 0.9);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
+
+        .ios-status-bar-time {
+            font-weight: 600;
+            font-size: 15px;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
+
+        .ios-nav-bar {
+            height: 44px;
+            background-color: var(--ios-card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--ios-border);
         }
-        
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+        .ios-nav-title {
+            font-weight: 600;
+            font-size: 17px;
         }
-        
-        .app-description {
-            font-size: 1.2rem;
-            color: #aaa;
+
+        .ios-nav-button {
+            color: var(--ios-primary);
+            font-weight: 600;
+            font-size: 17px;
+            background: none;
+            border: none;
+            padding: 8px 12px;
+        }
+
+        .ios-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
             max-width: 800px;
             margin: 0 auto;
-            line-height: 1.6;
+            width: 100%;
         }
-        
-        .tabs {
+
+        .ios-card {
+            background-color: var(--ios-card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px var(--ios-shadow);
+        }
+
+        .ios-segmented-control {
             display: flex;
-            margin-bottom: 20px;
-            background: rgba(40, 40, 40, 0.8);
-            border-radius: 10px;
-            overflow: hidden;
+            background-color: var(--ios-gray6);
+            border-radius: 9px;
+            padding: 3px;
+            margin-bottom: 16px;
         }
-        
-        .tab {
-            padding: 15px 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-align: center;
+
+        .ios-segment {
             flex: 1;
-        }
-        
-        .tab.active {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        
-        @media (max-width: 900px) {
-            .controls {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .panel {
-            background: rgba(40, 40, 40, 0.8);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            height: 100%;
-        }
-        
-        h2 {
-            margin-bottom: 20px;
-            color: var(--secondary-color);
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 10px;
-            font-size: 1.6rem;
-        }
-        
-        h3 {
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-            font-size: 1.4rem;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
+            text-align: center;
+            padding: 7px 0;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--light-color);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        
-        input[type="file"] {
+
+        .ios-segment.active {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .ios-segment.active {
+            background-color: var(--ios-gray5);
+        }
+
+        .ios-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ios-label);
+            display: flex;
+            align-items: center;
+        }
+
+        .ios-section-title i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .ios-input {
             width: 100%;
             padding: 12px;
-            border-radius: 6px;
-            border: 2px dashed #555;
-            background: #252525;
-            color: var(--light-color);
-            cursor: pointer;
-            transition: border-color 0.3s;
+            background-color: var(--ios-gray6);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--ios-label);
         }
-        
-        input[type="file"]:hover {
-            border-color: var(--secondary-color);
+
+        .ios-input::placeholder {
+            color: var(--ios-gray2);
         }
-        
-        textarea {
+
+        .ios-textarea {
             width: 100%;
-            min-height: 140px;
-            padding: 14px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: #252525;
-            color: var(--light-color);
+            min-height: 120px;
+            padding: 12px;
+            background-color: var(--ios-gray6);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 12px;
             resize: vertical;
-            font-family: monospace;
-            font-size: 14px;
+            color: var(--ios-label);
+            font-family: inherit;
         }
-        
-        input[type="password"] {
+
+        .ios-file-input {
+            display: none;
+        }
+
+        .ios-file-label {
+            display: block;
+            width: 100%;
+            padding: 40px 20px;
+            background-color: var(--ios-gray6);
+            border: 2px dashed var(--ios-gray4);
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .ios-file-label i {
+            font-size: 32px;
+            color: var(--ios-gray2);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .ios-button {
+            display: block;
             width: 100%;
             padding: 14px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: #252525;
-            color: var(--light-color);
-            font-family: monospace;
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 15px;
-        }
-        
-        button {
-            flex: 1;
-            padding: 14px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background-color: var(--ios-primary);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: background-color 0.2s;
         }
-        
-        button:hover {
-            background: linear-gradient(to right, #34495e, #2980b9);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+
+        .ios-button:active {
+            background-color: #0056CC;
         }
-        
-        button:active {
-            transform: translateY(0);
+
+        .ios-button.secondary {
+            background-color: var(--ios-gray5);
+            color: var(--ios-label);
         }
-        
-        button.secondary {
-            background: linear-gradient(to right, #7f8c8d, #95a5a6);
+
+        .ios-button.secondary:active {
+            background-color: var(--ios-gray4);
         }
-        
-        button.secondary:hover {
-            background: linear-gradient(to right, #6c7a7b, #7f8c8d);
+
+        .ios-button.warning {
+            background-color: var(--ios-orange);
         }
-        
-        button.warning {
-            background: linear-gradient(to right, #e67e22, #d35400);
+
+        .ios-button.warning:active {
+            background-color: #CC7700;
         }
-        
-        button.warning:hover {
-            background: linear-gradient(to right, #d35400, #e67e22);
-        }
-        
-        .image-preview {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .image-preview img {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            border: 2px solid #555;
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 14px;
-            border-radius: 6px;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .success {
-            background: rgba(46, 204, 113, 0.15);
-            color: #2ecc71;
-            border: 1px solid #2ecc71;
-        }
-        
-        .error {
-            background: rgba(231, 76, 60, 0.15);
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
-        }
-        
-        .info {
-            background: rgba(52, 152, 219, 0.15);
-            color: #3498db;
-            border: 1px solid #3498db;
-        }
-        
-        .warning {
-            background: rgba(243, 156, 18, 0.15);
-            color: #f39c12;
-            border: 1px solid #f39c12;
-        }
-        
-        .advanced-options {
-            background: rgba(30, 30, 30, 0.8);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .option {
-            margin-bottom: 15px;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        input[type="range"] {
-            flex: 1;
-            height: 6px;
-            -webkit-appearance: none;
-            background: #444;
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            cursor: pointer;
-        }
-        
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--secondary-color);
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--secondary-color);
-        }
-        
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            color: #777;
-            font-size: 0.9rem;
-        }
-        
-        .technique-info {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(40, 40, 40, 0.8);
-            border-radius: 10px;
-            border-left: 4px solid var(--secondary-color);
-        }
-        
-        .technique-info ul {
-            padding-left: 20px;
-            line-height: 1.8;
-        }
-        
-        .technique-info li {
-            margin-bottom: 10px;
-        }
-        
-        .analysis-result {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(30, 30, 30, 0.8);
-            border-radius: 10px;
-            border: 1px solid #444;
-        }
-        
-        .result-item {
-            margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(50, 50, 50, 0.6);
-            border-radius: 6px;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background: #444;
-            border-radius: 5px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background: var(--secondary-color);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-        
-        .risk-low {
-            color: var(--success-color);
-        }
-        
-        .risk-medium {
-            color: var(--warning-color);
-        }
-        
-        .risk-high {
-            color: var(--accent-color);
-        }
-        
-        .analysis-section {
-            margin-top: 25px;
-        }
-        
-        .analysis-section h4 {
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
-        
-        .detection-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .method {
-            padding: 15px;
-            background: rgba(50, 50, 50, 0.6);
-            border-radius: 8px;
-            border-left: 3px solid var(--secondary-color);
-        }
-        
-        .histogram-container {
+
+        .ios-image-preview {
             width: 100%;
             height: 200px;
-            margin-top: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            background-color: var(--ios-gray6);
             display: flex;
-            align-items: flex-end;
-            gap: 1px;
-            background: rgba(40, 40, 40, 0.8);
-            padding: 10px;
-            border-radius: 5px;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .histogram-bar {
-            flex: 1;
-            background: var(--secondary-color);
-            transition: height 0.3s ease;
-        }
-        
-        .analysis-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .analysis-type {
-            padding: 10px 15px;
-            background: rgba(40, 40, 40, 0.8);
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: var(--light-color);
-            cursor: pointer;
-        }
-        
-        .analysis-type.active {
-            background: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .canvas-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        canvas {
+
+        .ios-image-preview img {
             max-width: 100%;
-            border-radius: 5px;
-            border: 1px solid #444;
+            max-height: 100%;
+            object-fit: contain;
         }
-        
-        .recommendation {
-            padding: 10px;
-            margin: 10px 0;
-            background: rgba(52, 152, 219, 0.1);
-            border-left: 3px solid var(--secondary-color);
+
+        .ios-alert {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .ios-alert i {
+            margin-right: 8px;
+        }
+
+        .ios-alert.success {
+            background-color: rgba(52, 199, 89, 0.15);
+            color: var(--ios-green);
+        }
+
+        .ios-alert.error {
+            background-color: rgba(255, 59, 48, 0.15);
+            color: var(--ios-red);
+        }
+
+        .ios-alert.info {
+            background-color: rgba(0, 122, 255, 0.15);
+            color: var(--ios-primary);
+        }
+
+        .ios-alert.warning {
+            background-color: rgba(255, 149, 0, 0.15);
+            color: var(--ios-orange);
+        }
+
+        .ios-slider-container {
+            margin-bottom: 20px;
+        }
+
+        .ios-slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--ios-label);
+        }
+
+        .ios-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: var(--ios-gray4);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .ios-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--ios-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .ios-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .ios-toggle-label {
+            font-size: 16px;
+        }
+
+        .ios-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
+        }
+
+        .ios-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ios-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--ios-gray4);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .ios-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 27px;
+            width: 27px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .ios-toggle-slider {
+            background-color: var(--ios-primary);
+        }
+
+        input:checked + .ios-toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .ios-progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: var(--ios-gray5);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .ios-progress {
+            height: 100%;
+            background-color: var(--ios-primary);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .ios-risk-low {
+            color: var(--ios-green);
+        }
+
+        .ios-risk-medium {
+            color: var(--ios-orange);
+        }
+
+        .ios-risk-high {
+            color: var(--ios-red);
+        }
+
+        .ios-tab-content {
+            display: none;
+        }
+
+        .ios-tab-content.active {
+            display: block;
+        }
+
+        .ios-detail-text {
+            font-size: 14px;
+            color: var(--ios-secondary-label);
+            margin-top: 4px;
+        }
+
+        .ios-list {
+            list-style: none;
+        }
+
+        .ios-list-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--ios-border);
+        }
+
+        .ios-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .ios-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .ios-badge.primary {
+            background-color: rgba(0, 122, 255, 0.15);
+            color: var(--ios-primary);
+        }
+
+        .ios-badge.green {
+            background-color: rgba(52, 199, 89, 0.15);
+            color: var(--ios-green);
+        }
+
+        .ios-badge.orange {
+            background-color: rgba(255, 149, 0, 0.15);
+            color: var(--ios-orange);
+        }
+
+        .ios-home-indicator {
+            height: 34px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ios-home-indicator-line {
+            width: 134px;
+            height: 5px;
+            background-color: black;
             border-radius: 3px;
         }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: var(--secondary-color);
-            animation: spin 1s ease-in-out infinite;
+
+        .dark-mode .ios-home-indicator-line {
+            background-color: white;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Адаптивность */
+        @media (min-width: 768px) {
+            .ios-controls-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Профессиональная стеганография с анализом криптостойкости</h1>
-            <p class="app-description">Продвинутое приложение для скрытия текста в изображениях с профессиональным анализом устойчивости к обнаружению</p>
-        </header>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="stegano">Стеганография</div>
-            <div class="tab" data-tab="analysis">Анализ стойкости</div>
-            <div class="tab" data-tab="detection">Обнаружение</div>
-        </div>
-        
-        <div class="tab-content active" id="stegano-tab">
-            <div class="controls">
-                <div class="panel">
-                    <h2>Сокрытие сообщения</h2>
-                    <div class="input-group">
-                        <label for="image-input">Выберите изображение-контейнер:</label>
-                        <input type="file" id="image-input" accept="image/*">
+    <div class="ios-status-bar">
+        <div class="ios-status-bar-time" id="current-time">12:00</div>
+    </div>
+
+    <div class="ios-nav-bar">
+        <button class="ios-nav-button">Настройки</button>
+        <div class="ios-nav-title">CryptoStego</div>
+        <button class="ios-nav-button">Справка</button>
+    </div>
+
+    <div class="ios-container">
+        <div class="ios-card">
+            <div class="ios-segmented-control">
+                <div class="ios-segment active" data-tab="stegano">Стеганография</div>
+                <div class="ios-segment" data-tab="analysis">Анализ</div>
+                <div class="ios-segment" data-tab="detection">Обнаружение</div>
+            </div>
+
+            <div class="ios-tab-content active" id="stegano-tab">
+                <div class="ios-controls-grid">
+                    <div class="ios-card">
+                        <div class="ios-section-title"><i class="fas fa-lock"></i> Сокрытие сообщения</div>
+                        
+                        <label class="ios-file-label" for="image-input">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div>Выберите изображение</div>
+                            <div class="ios-detail-text">PNG или JPG, до 10 МБ</div>
+                        </label>
+                        <input type="file" id="image-input" class="ios-file-input" accept="image/*">
+                        
+                        <div class="ios-image-preview">
+                            <img id="original-image" src="" alt="Оригинальное изображение" style="display: none;">
+                            <i class="fas fa-image" style="font-size: 40px; color: var(--ios-gray3);"></i>
+                        </div>
+                        
+                        <textarea class="ios-textarea" id="message" placeholder="Введите текст для скрытия..."></textarea>
+                        
+                        <input type="password" class="ios-input" id="password" placeholder="Ключ шифрования">
+                        
+                        <button class="ios-button" id="encode-btn">
+                            <i class="fas fa-shield-alt"></i> Скрыть сообщение
+                        </button>
+                        
+                        <button class="ios-button secondary" id="analyze-btn">
+                            <i class="fas fa-chart-bar"></i> Анализировать изображение
+                        </button>
+                        
+                        <div id="encode-status" class="ios-alert info" style="display: none;">
+                            <i class="fas fa-info-circle"></i> Готов к работе
+                        </div>
                     </div>
                     
-                    <div class="input-group">
-                        <label for="message">Сообщение для скрытия:</label>
-                        <textarea id="message" placeholder="Введите текст, который нужно скрыть..."></textarea>
+                    <div class="ios-card">
+                        <div class="ios-section-title"><i class="fas fa-unlock"></i> Извлечение сообщения</div>
+                        
+                        <label class="ios-file-label" for="stego-image-input">
+                            <i class="fas fa-file-image"></i>
+                            <div>Выберите изображение</div>
+                            <div class="ios-detail-text">Содержащее скрытое сообщение</div>
+                        </label>
+                        <input type="file" id="stego-image-input" class="ios-file-input" accept="image/*">
+                        
+                        <input type="password" class="ios-input" id="decode-password" placeholder="Ключ шифрования">
+                        
+                        <button class="ios-button" id="decode-btn">
+                            <i class="fas fa-search"></i> Извлечь сообщение
+                        </button>
+                        
+                        <textarea class="ios-textarea" id="decoded-message" readonly placeholder="Извлеченное сообщение появится здесь"></textarea>
+                        
+                        <div id="decode-status" class="ios-alert info" style="display: none;">
+                            <i class="fas fa-info-circle"></i> Ожидание изображения
+                        </div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label for="password">Ключ шифрования:</label>
-                        <input type="password" id="password" placeholder="Введите надежный ключ">
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button id="encode-btn">Скрыть сообщение</button>
-                        <button id="analyze-btn" class="secondary">Анализировать изображение</button>
-                    </div>
-                    
-                    <div class="image-preview">
-                        <img id="original-image" src="" alt="Оригинальное изображение" style="display: none;">
-                    </div>
-                    
-                    <div id="encode-status" class="status"></div>
                 </div>
                 
-                <div class="panel">
-                    <h2>Извлечение сообщения</h2>
-                    <div class="input-group">
-                        <label for="stego-image-input">Выберите изображение со скрытым сообщением:</label>
-                        <input type="file" id="stego-image-input" accept="image/*">
-                    </div>
+                <div class="ios-card">
+                    <div class="ios-section-title"><i class="fas fa-sliders-h"></i> Расширенные настройки</div>
                     
-                    <div class="input-group">
-                        <label for="decode-password">Ключ шифрования:</label>
-                        <input type="password" id="decode-password" placeholder="Введите ключ для расшифровки">
-                    </div>
-                    
-                    <button id="decode-btn">Извлечь сообщение</button>
-                    
-                    <div class="input-group">
-                        <label for="decoded-message">Извлеченное сообщение:</label>
-                        <textarea id="decoded-message" readonly placeholder="Здесь появится извлеченный текст"></textarea>
-                    </div>
-                    
-                    <div id="decode-status" class="status"></div>
-                </div>
-            </div>
-            
-            <div class="advanced-options">
-                <h3>Расширенные настройки скрытности</h3>
-                <div class="options-grid">
-                    <div class="option">
-                        <label for="bit-depth">Глубина внедрения (бит на канал):</label>
-                        <div class="slider-container">
-                            <input type="range" id="bit-depth" min="1" max="4" value="1">
-                            <span id="bit-depth-value" class="slider-value">1</span>
+                    <div class="ios-slider-container">
+                        <div class="ios-slider-label">
+                            <span>Глубина внедрения: <span id="bit-depth-value">1</span> бит</span>
+                            <span class="ios-detail-text">Скрытность ↔ Вместимость</span>
                         </div>
+                        <input type="range" min="1" max="4" value="1" class="ios-slider" id="bit-depth">
                     </div>
                     
-                    <div class="option">
-                        <label for="noise-level">Уровень маскирующего шума:</label>
-                        <div class="slider-container">
-                            <input type="range" id="noise-level" min="0" max="100" value="10">
-                            <span id="noise-level-value" class="slider-value">10%</span>
+                    <div class="ios-slider-container">
+                        <div class="ios-slider-label">
+                            <span>Уровень шума: <span id="noise-level-value">10</span>%</span>
+                            <span class="ios-detail-text">Маскировка ↔ Качество</span>
                         </div>
+                        <input type="range" min="0" max="100" value="10" class="ios-slider" id="noise-level">
                     </div>
                     
-                    <div class="option">
-                        <div class="checkbox-group">
+                    <div class="ios-toggle">
+                        <span class="ios-toggle-label">Адаптивное внедрение</span>
+                        <label class="ios-toggle-switch">
                             <input type="checkbox" id="adaptive-embedding" checked>
-                            <label for="adaptive-embedding">Адаптивное внедрение (рекомендуется)</label>
-                        </div>
+                            <span class="ios-toggle-slider"></span>
+                        </label>
                     </div>
                     
-                    <div class="option">
-                        <div class="checkbox-group">
+                    <div class="ios-toggle">
+                        <span class="ios-toggle-label">Случайное распределение</span>
+                        <label class="ios-toggle-switch">
                             <input type="checkbox" id="random-distribution" checked>
-                            <label for="random-distribution">Случайное распределение данных</label>
-                        </div>
+                            <span class="ios-toggle-slider"></span>
+                        </label>
                     </div>
                     
-                    <div class="option">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="dct-method">
-                            <label for="dct-method">Использовать DCT-метод (для JPEG)</label>
-                        </div>
-                    </div>
-                    
-                    <div class="option">
-                        <div class="checkbox-group">
+                    <div class="ios-toggle">
+                        <span class="ios-toggle-label">Защита от анализа</span>
+                        <label class="ios-toggle-switch">
                             <input type="checkbox" id="anti-analysis" checked>
-                            <label for="anti-analysis">Защита от стегоанализа</label>
+                            <span class="ios-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ios-tab-content" id="analysis-tab">
+                <div class="ios-card">
+                    <div class="ios-section-title"><i class="fas fa-shield-alt"></i> Анализ стойкости</div>
+                    
+                    <label class="ios-file-label" for="analysis-image">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>Выберите изображение для анализа</div>
+                    </label>
+                    <input type="file" id="analysis-image" class="ios-file-input" accept="image/*">
+                    
+                    <div class="ios-segmented-control">
+                        <div class="ios-segment active" data-analysis="histogram">Гистограммы</div>
+                        <div class="ios-segment" data-analysis="chi2">Хи-квадрат</div>
+                        <div class="ios-segment" data-analysis="rs">RS-анализ</div>
+                        <div class="ios-segment" data-analysis="noise">Шум</div>
+                    </div>
+                    
+                    <button class="ios-button" id="start-analysis">
+                        <i class="fas fa-play"></i> Запустить анализ
+                    </button>
+                    
+                    <div class="ios-section-title" style="margin-top: 20px;"><i class="fas fa-chart-line"></i> Результаты анализа</div>
+                    
+                    <div class="ios-list">
+                        <div class="ios-list-item">
+                            <div>Обнаружение LSB-внедрения</div>
+                            <div class="ios-detail-text">Анализ младших значащих битов</div>
+                            <div class="ios-risk-low" id="lsb-result">Не проверено</div>
+                            <div class="ios-progress-bar">
+                                <div class="ios-progress" id="lsb-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Статистические аномалии</div>
+                            <div class="ios-detail-text">Отклонения от нормального распределения</div>
+                            <div class="ios-risk-low" id="stats-result">Не проверено</div>
+                            <div class="ios-progress-bar">
+                                <div class="ios-progress" id="stats-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Анализ гистограммы</div>
+                            <div class="ios-detail-text">Распределение цветовых значений</div>
+                            <div class="ios-risk-low" id="histogram-result">Не проверено</div>
+                            <div class="ios-progress-bar">
+                                <div class="ios-progress" id="histogram-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Анализ шумовых характеристик</div>
+                            <div class="ios-detail-text">Отклонения в шумовой модели</div>
+                            <div class="ios-risk-low" id="noise-result">Не проверено</div>
+                            <div class="ios-progress-bar">
+                                <div class="ios-progress" id="noise-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Стойкость к атакам</div>
+                            <div class="ios-detail-text">Устойчивость к методам обнаружения</div>
+                            <div class="ios-risk-low" id="resistance-result">Не проверено</div>
+                            <div class="ios-progress-bar">
+                                <div class="ios-progress" id="resistance-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ios-alert info" style="margin-top: 16px;">
+                        <i class="fas fa-lightbulb"></i> 
+                        <div>Общая оценка стойкости: <span id="overall-score" class="ios-risk-low">Не проверено</span></div>
+                        <div class="ios-progress-bar">
+                            <div class="ios-progress" id="overall-progress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="technique-info">
-                <h3>Используемые методы повышения скрытности:</h3>
-                <ul>
-                    <li>Псевдослучайное распределение данных по изображению с использованием криптографического ключа</li>
-                    <li>Адаптивное внедрение с предпочтением текстурных областей</li>
-                    <li>Динамическое изменение глубины внедрения (1-4 младших бита)</li>
-                    <li>Добавление маскирующего шума для снижения статистических аномалий</li>
-                    <li>Шифрование сообщения перед внедрением (AES-GCM)</li>
-                    <li>Механизмы противодействия стегоанализу</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="tab-content" id="analysis-tab">
-            <div class="panel">
-                <h2>Профессиональный анализ стойкости стеганографического внедрения</h2>
-                
-                <div class="input-group">
-                    <label for="analysis-image">Выберите изображение для анализа:</label>
-                    <input type="file" id="analysis-image" accept="image/*">
+            <div class="ios-tab-content" id="detection-tab">
+                <div class="ios-card">
+                    <div class="ios-section-title"><i class="fas fa-search"></i> Методы обнаружения</div>
+                    
+                    <div class="ios-list">
+                        <div class="ios-list-item">
+                            <div>Статистический анализ</div>
+                            <div class="ios-detail-text">Выявление аномалий в распределении значений пикселей</div>
+                            <span class="ios-badge primary">Высокая точность</span>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Анализ гистограмм</div>
+                            <div class="ios-detail-text">Сравнение распределения цветовых характеристик</div>
+                            <span class="ios-badge green">Для LSB</span>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Хи-квадрат тест</div>
+                            <div class="ios-detail-text">Обнаружение LSB-стеганографии по равномерности пар значений</div>
+                            <span class="ios-badge orange">Средняя точность</span>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>RS-анализ</div>
+                            <div class="ios-detail-text">Классификация групп пикселей и анализ их регулярности</div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Анализ шумовых характеристик</div>
+                            <div class="ios-detail-text">Исследование уровня шума и выявление аномалий</div>
+                        </div>
+                        
+                        <div class="ios-list-item">
+                            <div>Машинное обучение</div>
+                            <div class="ios-detail-text">Использование обученных классификаторов для обнаружения</div>
+                            <span class="ios-badge primary">Современный метод</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="analysis-controls">
-                    <div class="analysis-type active" data-type="histogram">Гистограммы</div>
-                    <div class="analysis-type" data-type="chi2">Хи-квадрат</div>
-                    <div class="analysis-type" data-type="rs">RS-анализ</div>
-                    <div class="analysis-type" data-type="noise">Анализ шума</div>
-                </div>
-                
-                <button id="start-analysis">Запустить анализ стойкости</button>
-                
-                <div class="analysis-result">
-                    <h3>Результаты анализа</h3>
+                <div class="ios-card">
+                    <div class="ios-section-title"><i class="fas fa-lightbulb"></i> Рекомендации по скрытности</div>
                     
-                    <div class="result-item">
-                        <span>Обнаружение LSB-внедрения: </span>
-                        <span class="risk-low" id="lsb-result">Не проверено</span>
-                        <div class="progress-bar">
-                            <div class="progress" id="lsb-progress" style="width: 0%"></div>
+                    <div class="ios-list">
+                        <div class="ios-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                            <div>Используйте адаптивные методы внедрения</div>
                         </div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>Статистические аномалии: </span>
-                        <span class="risk-low" id="stats-result">Не проверено</span>
-                        <div class="progress-bar">
-                            <div class="progress" id="stats-progress" style="width: 0%"></div>
+                        
+                        <div class="ios-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                            <div>Ограничивайте объем данных (5-10% от емкости)</div>
                         </div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>Анализ гистограммы: </span>
-                        <span class="risk-low" id="histogram-result">Не проверено</span>
-                        <div class="progress-bar">
-                            <div class="progress" id="histogram-progress" style="width: 0%"></div>
+                        
+                        <div class="ios-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                            <div>Применяйте криптографическое преобразование</div>
                         </div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>Обнаружение стеганографии по шуму: </span>
-                        <span class="risk-low" id="noise-result">Не проверено</span>
-                        <div class="progress-bar">
-                            <div class="progress" id="noise-progress" style="width: 0%"></div>
+                        
+                        <div class="ios-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                            <div>Используйте текстурные области для внедрения</div>
                         </div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>Стойкость к атакам: </span>
-                        <span class="risk-low" id="resistance-result">Не проверено</span>
-                        <div class="progress-bar">
-                            <div class="progress" id="resistance-progress" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="analysis-section">
-                        <h4>Общая оценка стойкости: <span id="overall-score" class="risk-low">Не проверено</span></h4>
-                        <div class="progress-bar">
-                            <div class="progress" id="overall-progress" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    
-                    <div id="histogram-visualization" class="canvas-container">
-                        <h4>Гистограмма распределения цветов:</h4>
-                        <div class="histogram-container" id="histogram-bars"></div>
-                    </div>
-                    
-                    <div class="analysis-section">
-                        <h4>Рекомендации по улучшению:</h4>
-                        <div id="recommendations">
-                            <div class="recommendation">Загрузите изображение для анализа</div>
+                        
+                        <div class="ios-list-item">
+                            <i class="fas fa-check-circle" style="color: var(--ios-green); margin-right: 10px;"></i>
+                            <div>Сохраняйте статистические характеристики</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="tab-content" id="detection-tab">
-            <div class="panel">
-                <h2>Методы обнаружения стеганографии</h2>
-                
-                <div class="detection-methods">
-                    <div class="method">
-                        <h4>Статистический анализ</h4>
-                        <p>Проверка аномалий в распределении значений пикселей, выявление неестественных закономерностей.</p>
-                    </div>
-                    
-                    <div class="method">
-                        <h4>Анализ гистограмм</h4>
-                        <p>Сравнение гистограмм исходного и стегоизображения, выявление различий в распределении цветов.</p>
-                    </div>
-                    
-                    <div class="method">
-                        <h4>Хи-квадрат тест</h4>
-                        <p>Обнаружение LSB-стеганографии путем проверки равномерности распределения пар значений.</p>
-                    </div>
-                    
-                    <div class="method">
-                        <h4>Анализ RS</h4>
-                        <p>Метод обнаружения стеганографии путем классификации групп пикселей и анализа их регулярности.</p>
-                    </div>
-                    
-                    <div class="method">
-                        <h4>Анализ шумовых характеристик</h4>
-                        <p>Исследование уровня шума в изображении и выявление аномалий, вызванных стеговнедрением.</p>
-                    </div>
-                    
-                    <div class="method">
-                        <h4>Машинное обучение</h4>
-                        <p>Использование классификаторов, обученных на множестве чистых и стегоизображений.</p>
-                    </div>
-                </div>
-                
-                <div class="technique-info">
-                    <h3>Как повысить стойкость к обнаружению:</h3>
-                    <ul>
-                        <li>Используйте адаптивные методы внедрения, учитывающие содержимое изображения</li>
-                        <li>Ограничивайте объем внедряемых данных (не более 5-10% от емкости контейнера)</li>
-                        <li>Применяйте криптографическое преобразование данных перед внедрением</li>
-                        <li>Используйте области изображения с высоким уровнем шума/текстуры для внедрения</li>
-                        <li>Реализуйте механизмы сохранения статистических характеристик контейнера</li>
-                        <li>Рассмотрите использование более сложных методов (DCT-коэффициенты, вейвлет-преобразование)</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>Профессиональное стеганографическое приложение с анализом стойкости &copy; 2023</p>
         </div>
     </div>
 
+    <div class="ios-home-indicator">
+        <div class="ios-home-indicator-line"></div>
+    </div>
+
     <script>
+        // Обновление времени в статус-баре
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 60000);
+        updateTime();
+        
+        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
-            // Элементы интерфейса
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const analysisTypes = document.querySelectorAll('.analysis-type');
+            // Управление табами
+            const tabs = document.querySelectorAll('.ios-segment');
+            const tabContents = document.querySelectorAll('.ios-tab-content');
             
-            // Управление вкладками
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabId = tab.getAttribute('data-tab');
@@ -775,156 +824,274 @@
             });
             
             // Управление типами анализа
-            analysisTypes.forEach(type => {
-                type.addEventListener('click', () => {
-                    analysisTypes.forEach(t => t.classList.remove('active'));
-                    type.classList.add('active');
+            const analysisTabs = document.querySelectorAll('[data-analysis]');
+            analysisTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    analysisTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
                 });
             });
             
-            // Элементы стеганографии
-            const imageInput = document.getElementById('image-input');
-            const stegoImageInput = document.getElementById('stego-image-input');
-            const originalImage = document.getElementById('original-image');
-            const messageInput = document.getElementById('message');
-            const passwordInput = document.getElementById('password');
-            const decodePasswordInput = document.getElementById('decode-password');
-            const decodedMessage = document.getElementById('decoded-message');
-            const encodeBtn = document.getElementById('encode-btn');
-            const decodeBtn = document.getElementById('decode-btn');
-            const analyzeBtn = document.getElementById('analyze-btn');
-            const encodeStatus = document.getElementById('encode-status');
-            const decodeStatus = document.getElementById('decode-status');
-            
-            // Настройки
+            // Обновление значений слайдеров
             const bitDepthSlider = document.getElementById('bit-depth');
             const bitDepthValue = document.getElementById('bit-depth-value');
             const noiseLevelSlider = document.getElementById('noise-level');
             const noiseLevelValue = document.getElementById('noise-level-value');
-            const adaptiveEmbedding = document.getElementById('adaptive-embedding');
-            const randomDistribution = document.getElementById('random-distribution');
-            const dctMethod = document.getElementById('dct-method');
-            const antiAnalysis = document.getElementById('anti-analysis');
             
-            // Элементы анализа
-            const analysisImage = document.getElementById('analysis-image');
-            const startAnalysis = document.getElementById('start-analysis');
-            const histogramBars = document.getElementById('histogram-bars');
-            
-            let originalImageData = null;
-            let analysisResult = null;
-            
-            // Обновление значений слайдеров
             bitDepthSlider.addEventListener('input', function() {
                 bitDepthValue.textContent = this.value;
             });
             
             noiseLevelSlider.addEventListener('input', function() {
-                noiseLevelValue.textContent = this.value + '%';
+                noiseLevelValue.textContent = this.value;
             });
             
-            // Показ превью изображения
-            imageInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        originalImage.src = event.target.result;
-                        originalImage.style.display = 'block';
+            // Обработка выбора файлов
+            const fileInputs = document.querySelectorAll('.ios-file-input');
+            fileInputs.forEach(input => {
+                const label = input.previousElementSibling;
+                
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        label.querySelector('div').textContent = file.name;
                         
-                        // Загрузка изображения для получения pixel data
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            ctx.drawImage(img, 0, 0);
-                            originalImageData = ctx.getImageData( 0, 0, canvas.width, canvas.height);
-                            
-                            // Расчет максимального размер сообщения
-                            const bitsPerPixel = parseInt(bitDepthSlider.value);
-                            const maxMessageSize = Math.floor((img.width * img.height * 3 * bitsPerPixel) / 8) - 100;
-                            messageInput.setAttribute('maxlength', maxMessageSize);
-                            encodeStatus.textContent = `Максимальный размер сообщения: ${maxMessageSize} символов`;
-                            encodeStatus.className = 'status info';
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
+                        // Если это изображение, показываем превью
+                        if (input.id === 'image-input' || input.id === 'stego-image-input') {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const img = document.getElementById(input.id === 'image-input' ? 'original-image' : 'stego-image');
+                                if (!img) {
+                                    const newImg = document.createElement('img');
+                                    newImg.id = input.id === 'image-input' ? 'original-image' : 'stego-image';
+                                    newImg.src = event.target.result;
+                                    newImg.alt = "Загруженное изображение";
+                                    newImg.style.display = 'block';
+                                    label.nextElementSibling.appendChild(newImg);
+                                } else {
+                                    img.src = event.target.result;
+                                    img.style.display = 'block';
+                                }
+                                
+                                // Скрываем иконку placeholder
+                                const placeholderIcon = label.nextElementSibling.querySelector('i');
+                                if (placeholderIcon) {
+                                    placeholderIcon.style.display = 'none';
+                                }
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+            });
+            
+            // Кодирование сообщения в изображение
+            document.getElementById('encode-btn').addEventListener('click', async function() {
+                const imageInput = document.getElementById('image-input');
+                const messageInput = document.getElementById('message');
+                const passwordInput = document.getElementById('password');
+                const status = document.getElementById('encode-status');
+                
+                if (!imageInput.files[0]) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
+                    return;
+                }
+                
+                if (!messageInput.value) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите сообщение';
+                    return;
+                }
+                
+                if (!passwordInput.value) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите ключ шифрования';
+                    return;
+                }
+                
+                status.style.display = 'flex';
+                status.className = 'ios-alert info';
+                status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс скрытия сообщения...';
+                
+                try {
+                    // Получаем настройки
+                    const bitsPerChannel = parseInt(bitDepthSlider.value);
+                    const noiseLevel = parseInt(noiseLevelSlider.value) / 100;
+                    const useAdaptive = document.getElementById('adaptive-embedding').checked;
+                    const useRandom = document.getElementById('random-distribution').checked;
+                    const useAntiAnalysis = document.getElementById('anti-analysis').checked;
+                    
+                    // Загружаем изображение
+                    const imageFile = imageInput.files[0];
+                    const imageData = await loadImageData(imageFile);
+                    
+                    // Шифруем сообщение
+                    const encryptedMessage = await encryptMessage(messageInput.value, passwordInput.value);
+                    
+                    // Преобразуем сообщение в битовый массив
+                    const messageBits = [];
+                    for (let byte of encryptedMessage) {
+                        for (let i = 7; i >= 0; i--) {
+                            messageBits.push((byte >> i) & 1);
+                        }
+                    }
+                    
+                    // Добавляем маркер конца сообщения
+                    for (let i = 0; i < 32; i++) {
+                        messageBits.push(0);
+                    }
+                    
+                    // Генерируем позиции для внедрения
+                    const positions = generatePositions(imageData, messageBits.length, useRandom ? passwordInput.value : null);
+                    
+                    // Анализируем текстуру изображения (если включено адаптивное внедрение)
+                    let textureMap = null;
+                    if (useAdaptive) {
+                        textureMap = analyzeTexture(imageData);
+                    }
+                    
+                    // Встраиваем сообщение
+                    embedMessage(imageData, messageBits, positions, bitsPerChannel, textureMap);
+                    
+                    // Добавляем маскирующий шум
+                    if (noiseLevel > 0) {
+                        addNoise(imageData, noiseLevel, textureMap);
+                    }
+                    
+                    // Применяем защиту от стегоанализа
+                    if (useAntiAnalysis) {
+                        applyAntiAnalysis(imageData, textureMap);
+                    }
+                    
+                    // Сохраняем результат
+                    const resultImage = await saveImageData(imageData);
+                    const link = document.createElement('a');
+                    link.download = 'secure-stego-image.png';
+                    link.href = resultImage;
+                    link.click();
+                    
+                    status.className = 'ios-alert success';
+                    status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно скрыто! Файл сохранен.';
+                } catch (error) {
+                    status.className = 'ios-alert error';
+                    status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
+                }
+            });
+            
+            // Декодирование сообщения из изображения
+            document.getElementById('decode-btn').addEventListener('click', async function() {
+                const imageInput = document.getElementById('stego-image-input');
+                const passwordInput = document.getElementById('decode-password');
+                const status = document.getElementById('decode-status');
+                
+                if (!imageInput.files[0]) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
+                    return;
+                }
+                
+                if (!passwordInput.value) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Введите ключ шифрования';
+                    return;
+                }
+                
+                status.style.display = 'flex';
+                status.className = 'ios-alert info';
+                status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс извлечения сообщения...';
+                
+                try {
+                    // Получаем настройки
+                    const bitsPerChannel = parseInt(bitDepthSlider.value);
+                    const useRandom = document.getElementById('random-distribution').checked;
+                    
+                    // Загружаем изображение
+                    const imageFile = imageInput.files[0];
+                    const imageData = await loadImageData(imageFile);
+                    
+                    // Генерируем позиции для извлечения
+                    const estimatedBits = (imageData.width * imageData.height * 3 * bitsPerChannel) - 32;
+                    const positions = generatePositions(imageData, estimatedBits, useRandom ? passwordInput.value : null);
+                    
+                    // Извлекаем биты
+                    const extractedBits = extractBits(imageData, positions, bitsPerChannel);
+                    
+                    // Ищем маркер конца сообщения
+                    let endIndex = -1;
+                    for (let i = 0; i < extractedBits.length - 31; i++) {
+                        if (extractedBits.slice(i, i + 32).every(bit => bit === 0)) {
+                            endIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (endIndex === -1) {
+                        throw new Error('Не удалось найти конец сообщения. Возможно, неверный ключ.');
+                    }
+                    
+                    // Обрезаем биты до конца сообщения
+                    const messageBits = extractedBits.slice(0, endIndex);
+                    
+                    // Конвертируем биты в байты
+                    const bytes = [];
+                    for (let i = 0; i < messageBits.length; i += 8) {
+                        if (i + 8 > messageBits.length) break;
+                        
+                        let byte = 0;
+                        for (let j = 0; j < 8; j++) {
+                            byte = (byte << 1) | messageBits[i + j];
+                        }
+                        bytes.push(byte);
+                    }
+                    
+                    // Дешифруем сообщение
+                    const decryptedMessage = await decryptMessage(bytes, passwordInput.value);
+                    document.getElementById('decoded-message').value = decryptedMessage;
+                    
+                    status.className = 'ios-alert success';
+                    status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно извлечено!';
+                } catch (error) {
+                    status.className = 'ios-alert error';
+                    status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
                 }
             });
             
             // Анализ изображения
-            analyzeBtn.addEventListener('click', function() {
-                if (!originalImageData) {
-                    showStatus(encodeStatus, 'Сначала выберите изображение', 'error');
+            document.getElementById('analyze-btn').addEventListener('click', async function() {
+                const imageInput = document.getElementById('image-input');
+                const status = document.getElementById('encode-status');
+                
+                if (!imageInput.files[0]) {
+                    status.style.display = 'flex';
+                    status.className = 'ios-alert error';
+                    status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Выберите изображение';
                     return;
                 }
                 
+                status.style.display = 'flex';
+                status.className = 'ios-alert info';
+                status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Анализирую текстуру изображения...';
+                
                 try {
-                    // Профессиональный анализ текстурных областей с использованием метода Local Binary Patterns
-                    const width = originalImageData.width;
-                    const height = originalImageData.height;
-                    const data = originalImageData.data;
+                    // Загружаем изображение
+                    const imageFile = imageInput.files[0];
+                    const imageData = await loadImageData(imageFile);
                     
-                    let textureMap = new Uint8Array(width * height);
+                    // Анализируем текстуру
+                    const textureMap = analyzeTexture(imageData);
                     
-                    // Вычисляем карту текстур с использованием LBP
-                    for (let y = 1; y < height - 1; y++) {
-                        for (let x = 1; x < width - 1; x++) {
-                            const centerIdx = (y * width + x) * 4;
-                            const centerValue = (data[centerIdx] + data[centerIdx+1] + data[centerIdx+2]) / 3;
-                            
-                            let lbpValue = 0;
-                            let pattern = [];
-                            
-                            // 8-соседний LBP
-                            const neighbors = [
-                                {dx: -1, dy: -1}, {dx: 0, dy: -1}, {dx: 1, dy: -1},
-                                {dx: -1, dy: 0}, /* center */      {dx: 1, dy: 0},
-                                {dx: -1, dy: 1},  {dx: 0, dy: 1},  {dx: 1, dy: 1}
-                            ];
-                            
-                            for (let i = 0; i < neighbors.length; i++) {
-                                const n = neighbors[i];
-                                const nX = x + n.dx;
-                                const nY = y + n.dy;
-                                
-                                if (nX >= 0 && nX < width && nY >= 0 && nY < height) {
-                                    const nIdx = (nY * width + nX) * 4;
-                                    const nValue = (data[nIdx] + data[nIdx+1] + data[nIdx+2]) / 3;
-                                    
-                                    if (nValue >= centerValue) {
-                                        lbpValue += (1 << i);
-                                        pattern.push(1);
-                                    } else {
-                                        pattern.push(0);
-                                    }
-                                }
-                            }
-                            
-                            // Вычисляем равномерность LBP (мера текстуры)
-                            let uniformity = 0;
-                            for (let i = 0; i < pattern.length; i++) {
-                                if (pattern[i] !== pattern[(i+1) % pattern.length]) {
-                                    uniformity++;
-                                }
-                            }
-                            
-                            // Высокая равномерность = низкая текстура, низкая равномерность = высокая текстура
-                            textureMap[y * width + x] = uniformity <= 2 ? 255 : 0;
-                        }
-                    }
-                    
-                    analysisResult = textureMap;
-                    
-                    // Визуализация карты текстур
+                    // Визуализируем результат
                     const textureCanvas = document.createElement('canvas');
-                    textureCanvas.width = width;
-                    textureCanvas.height = height;
+                    textureCanvas.width = imageData.width;
+                    textureCanvas.height = imageData.height;
                     const textureCtx = textureCanvas.getContext('2d');
-                    const textureImageData = textureCtx.createImageData(width, height);
+                    const textureImageData = textureCtx.createImageData(imageData.width, imageData.height);
                     
                     for (let i = 0; i < textureMap.length; i++) {
                         const value = textureMap[i];
@@ -935,292 +1102,86 @@
                     }
                     
                     textureCtx.putImageData(textureImageData, 0, 0);
-                    originalImage.src = textureCanvas.toDataURL();
+                    document.getElementById('original-image').src = textureCanvas.toDataURL();
                     
-                    showStatus(encodeStatus, 'Анализ завершен. Зеленые области подходят для внедрения.', 'success');
+                    status.className = 'ios-alert success';
+                    status.innerHTML = '<i class="fas fa-check-circle"></i> Анализ завершен. Светлые области лучше подходят для внедрения.';
                 } catch (error) {
-                    showStatus(encodeStatus, 'Ошибка при анализе изображения: ' + error.message, 'error');
+                    status.className = 'ios-alert error';
+                    status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
                 }
             });
             
-            // Кодирование сообщения в изображение
-            encodeBtn.addEventListener('click', async function() {
-                if (!originalImageData) {
-                    showStatus(encodeStatus, 'Сначала выберите изображение', 'error');
-                    return;
-                }
+            // Анализ стойкости
+            document.getElementById('start-analysis').addEventListener('click', async function() {
+                const imageInput = document.getElementById('analysis-image');
                 
-                const message = messageInput.value;
-                if (!message) {
-                    showStatus(encodeStatus, 'Введите сообщение для скрытия', 'error');
-                    return;
-                }
-                
-                const password = passwordInput.value;
-                if (!password) {
-                    showStatus(encodeStatus, 'Введите ключ шифрования', 'error');
-                    return;
-                }
-                
-                try {
-                    // Получаем настройки
-                    const bitsPerChannel = parseInt(bitDepthSlider.value);
-                    const noiseLevel = parseInt(noiseLevelSlider.value) / 100;
-                    const useAdaptive = adaptiveEmbedding.checked;
-                    const useRandom = randomDistribution.checked;
-                    const useDCT = dctMethod.checked;
-                    const useAntiAnalysis = antiAnalysis.checked;
-                    
-                    // Создаем копию imageData
-                    const newImageData = new ImageData(
-                        new Uint8ClampedArray(originalImageData.data),
-                        originalImageData.width,
-                        originalImageData.height
-                    );
-                    
-                    // Шифруем сообщение
-                    const encryptedMessage = await encryptMessage(message, password);
-                    
-                    // Преобразуем сообщение в битовый массив
-                    const messageBits = [];
-                    for (let byte of encryptedMessage) {
-                        for (let i = 7; i >= 0; i--) {
-                            messageBits.push((byte >> i) & 1);
-                        }
-                    }
-                    
-                    // Добавляем маркер конца сообщения (32 нулевых бита для надежности)
-                    for (let i = 0; i < 32; i++) {
-                        messageBits.push(0);
-                    }
-                    
-                    // Генерируем случайную последовательность для распределения битов
-                    const positions = generatePositions(newImageData, messageBits.length, useRandom ? password : null);
-                    
-                    // Встраиваем сообщение
-                    let bitIndex = 0;
-                    const width = newImageData.width;
-                    const height = newImageData.height;
-                    
-                    for (let i = 0; i < positions.length && bitIndex < messageBits.length; i++) {
-                        const pos = positions[i];
-                        const x = pos % width;
-                        const y = Math.floor(pos / width);
-                        const pixelIndex = (y * width + x) * 4;
-                        
-                        // Пропускаем прозрачность (альфа-канал)
-                        for (let channel = 0; channel < 3 && bitIndex < messageBits.length; channel++) {
-                            // Определяем, встраиваем ли мы в этот пиксель (для адаптивного режима)
-                            let shouldEmbed = true;
-                            let embedStrength = bitsPerChannel; // Сила внедрения (сколько бит)
-                            
-                            if (useAdaptive && analysisResult) {
-                                const textureValue = analysisResult[y * width + x];
-                                shouldEmbed = textureValue > 128; // Встраиваем только в текстурные области
-                                
-                                // Регулируем глубину внедрения в зависимости от текстурности
-                                if (shouldEmbed) {
-                                    embedStrength = Math.min(4, Math.max(1, Math.floor(textureValue / 64)));
-                                }
-                            }
-                            
-                            if (shouldEmbed) {
-                                // Встраиваем несколько бит в канал
-                                let channelValue = newImageData.data[pixelIndex + channel];
-                                for (let bit = 0; bit < embedStrength && bitIndex < messageBits.length; bit++) {
-                                    const bitMask = 1 << bit;
-                                    channelValue = (channelValue & ~bitMask) | (messageBits[bitIndex++] << bit);
-                                }
-                                newImageData.data[pixelIndex + channel] = channelValue;
-                            }
-                        }
-                    }
-                    
-                    // Добавляем маскирующий шум с учетом адаптивных областей
-                    if (noiseLevel > 0) {
-                        addAdaptiveNoise(newImageData, noiseLevel, bitsPerChannel, analysisResult);
-                    }
-                    
-                    // Применяем защиту от стегоанализа (если включено)
-                    if (useAntiAnalysis) {
-                        applyAdvancedAntiAnalysis(newImageData, analysisResult);
-                    }
-                    
-                    // Создаем canvas для отображения результата
-                    const canvas = document.createElement('canvas');
-                    canvas.width = newImageData.width;
-                    canvas.height = newImageData.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.putImageData(newImageData, 0, 0);
-                    
-                    // Создаем ссылку для скачивания
-                    const link = document.createElement('a');
-                    link.download = 'secure-stego-image.png';
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    showStatus(encodeStatus, 'Сообщение успешно скрыто! Файл сохранен как secure-stego-image.png', 'success');
-                } catch (error) {
-                    showStatus(encodeStatus, 'Ошибка при скрытии сообщения: ' + error.message, 'error');
-                }
-            });
-            
-            // Декодирование сообщения из изображения
-            decodeBtn.addEventListener('click', async function() {
-                const file = stegoImageInput.files[0];
-                if (!file) {
-                    showStatus(decodeStatus, 'Сначала выберите изображение', 'error');
-                    return;
-                }
-                
-                const password = decodePasswordInput.value;
-                if (!password) {
-                    showStatus(decodeStatus, 'Введите ключ шифрования', 'error');
-                    return;
-                }
-                
-                try {
-                    const bitsPerChannel = parseInt(bitDepthSlider.value);
-                    const useRandom = randomDistribution.checked;
-                    
-                    const reader = new FileReader();
-                    reader.onload = async function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
-                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                            
-                            // Генерируем ту же последовательность позиций
-                            const estimatedBits = (imageData.width * imageData.height * 3 * bitsPerChannel) - 32;
-                            const positions = generatePositions(imageData, estimatedBits, useRandom ? password : null);
-                            
-                            // Извлекаем биты
-                            const extractedBits = [];
-                            const width = imageData.width;
-                            
-                            for (let i = 0; i < positions.length; i++) {
-                                const pos = positions[i];
-                                const x = pos % width;
-                                const y = Math.floor(pos / width);
-                                const pixelIndex = (y * width + x) * 4;
-                                
-                                for (let channel = 0; channel < 3; channel++) {
-                                    const channelValue = imageData.data[pixelIndex + channel];
-                                    for (let bit = 0; bit < bitsPerChannel; bit++) {
-                                        const bitValue = (channelValue >> bit) & 1;
-                                        extractedBits.push(bitValue);
-                                        
-                                        // Проверяем на окончание сообщения (32 нулевых бита)
-                                        if (extractedBits.length >= 32) {
-                                            const last32Bits = extractedBits.slice(-32);
-                                            if (last32Bits.every(bit => bit === 0)) {
-                                                i = positions.length; // Выход из внешнего цикла
-                                                channel = 3; // Выход из цикла по каналам
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Удаляем конечные нулевые биты
-                            while (extractedBits.length >= 32 && extractedBits.slice(-32).every(bit => bit === 0)) {
-                                extractedBits.splice(-32, 32);
-                            }
-                            
-                            // Конвертируем биты в байты
-                            const bytes = [];
-                            for (let i = 0; i < extractedBits.length; i += 8) {
-                                if (i + 8 > extractedBits.length) break;
-                                
-                                let byte = 0;
-                                for (let j = 0; j < 8; j++) {
-                                    byte = (byte << 1) | extractedBits[i + j];
-                                }
-                                bytes.push(byte);
-                            }
-                            
-                            // Дешифруем сообщение
-                            const decryptedMessage = await decryptMessage(bytes, password);
-                            decodedMessage.value = decryptedMessage;
-                            
-                            showStatus(decodeStatus, 'Сообщение успешно извлечено!', 'success');
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } catch (error) {
-                    showStatus(decodeStatus, 'Ошибка при извлечении сообщения: ' + error.message, 'error');
-                }
-            });
-            
-            // Анализ стойкости изображения
-            startAnalysis.addEventListener('click', function() {
-                const file = analysisImage.files[0];
-                if (!file) {
+                if (!imageInput.files[0]) {
                     alert('Сначала выберите изображение для анализа');
                     return;
                 }
                 
-                const reader = new FileReader();
-                reader.onload = function(event) {
+                try {
+                    // Загружаем изображение
+                    const imageFile = imageInput.files[0];
+                    const imageData = await loadImageData(imageFile);
+                    
+                    // Запускаем анализ
+                    analyzeSteganoStrength(imageData);
+                } catch (error) {
+                    console.error('Ошибка анализа:', error);
+                }
+            });
+            
+            // Профессиональные функции стеганографии
+            
+            async function loadImageData(file) {
+                return new Promise((resolve, reject) => {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
                         canvas.width = img.width;
                         canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
                         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        
-                        // Запускаем анализ
-                        analyzeSteganoStrength(imageData);
+                        resolve(imageData);
                     };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+            }
             
-            // Профессиональные вспомогательные функции
+            async function saveImageData(imageData) {
+                const canvas = document.createElement('canvas');
+                canvas.width = imageData.width;
+                canvas.height = imageData.height;
+                const ctx = canvas.getContext('2d');
+                ctx.putImageData(imageData, 0, 0);
+                return canvas.toDataURL('image/png');
+            }
+            
             function generatePositions(imageData, length, seed) {
                 const positions = [];
                 const totalPixels = imageData.width * imageData.height;
                 
                 if (seed) {
-                    // Криптографически стойкий генератор позиций на основе HMAC
-                    const seedBuffer = new TextEncoder().encode(seed);
-                    
-                    // Генерируем детерминированную последовательность с помощью HMAC
+                    // Детерминированная последовательность на основе seed
                     let counter = 0;
                     const usedPositions = new Set();
                     
                     while (positions.length < length) {
-                        // Создаем HMAC на основе seed и счетчика
-                        const counterBuffer = new TextEncoder().encode(counter.toString());
-                        const combinedBuffer = new Uint8Array(seedBuffer.length + counterBuffer.length);
-                        combinedBuffer.set(seedBuffer, 0);
-                        combinedBuffer.set(counterBuffer, seedBuffer.length);
+                        // Генерируем хеш на основе seed и счетчика
+                        const hash = simpleHash(seed + counter.toString());
+                        const position = Math.abs(hash) % totalPixels;
                         
-                        // Хешируем комбинацию
-                        crypto.subtle.digest('SHA-256', combinedBuffer).then(hash => {
-                            const hashArray = new Uint32Array(new Uint8Array(hash).buffer);
-                            
-                            for (let value of hashArray) {
-                                const position = Math.abs(value) % totalPixels;
-                                if (!usedPositions.has(position)) {
-                                    positions.push(position);
-                                    usedPositions.add(position);
-                                    if (positions.length >= length) break;
-                                }
-                            }
-                        });
+                        if (!usedPositions.has(position)) {
+                            positions.push(position);
+                            usedPositions.add(position);
+                        }
                         
                         counter++;
-                        if (counter > 1000) break; // Защита от бесконечного цикла
+                        if (counter > 10000) break; // Защита от бесконечного цикла
                     }
                 } else {
                     // Последовательное распределение
@@ -1232,10 +1193,127 @@
                 return positions;
             }
             
-            function addAdaptiveNoise(imageData, intensity, bitsPerChannel, textureMap) {
+            function simpleHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                    hash |= 0; // Convert to 32bit integer
+                }
+                return hash;
+            }
+            
+            function analyzeTexture(imageData) {
+                const width = imageData.width;
+                const height = imageData.height;
+                const data = imageData.data;
+                const textureMap = new Uint8Array(width * height);
+                
+                // Простой анализ текстуры на основе вариации интенсивности
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        let variance = 0;
+                        let centerIdx = (y * width + x) * 4;
+                        let centerValue = (data[centerIdx] + data[centerIdx+1] + data[centerIdx+2]) / 3;
+                        
+                        // Проверяем 8 соседей
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dx === 0 && dy === 0) continue;
+                                
+                                const nX = x + dx;
+                                const nY = y + dy;
+                                
+                                if (nX >= 0 && nX < width && nY >= 0 && nY < height) {
+                                    const nIdx = (nY * width + nX) * 4;
+                                    const nValue = (data[nIdx] + data[nIdx+1] + data[nIdx+2]) / 3;
+                                    variance += Math.abs(nValue - centerValue);
+                                }
+                            }
+                        }
+                        
+                        // Нормализуем variance к 0-255
+                        textureMap[y * width + x] = Math.min(255, Math.max(0, variance / 8 * 5));
+                    }
+                }
+                
+                return textureMap;
+            }
+            
+            function embedMessage(imageData, messageBits, positions, bitsPerChannel, textureMap) {
                 const data = imageData.data;
                 const width = imageData.width;
-                const noiseIntensity = Math.floor(intensity * 15);
+                let bitIndex = 0;
+                
+                for (let i = 0; i < positions.length && bitIndex < messageBits.length; i++) {
+                    const pos = positions[i];
+                    const x = pos % width;
+                    const y = Math.floor(pos / width);
+                    const pixelIndex = (y * width + x) * 4;
+                    
+                    // Пропускаем прозрачность (альфа-канал)
+                    for (let channel = 0; channel < 3 && bitIndex < messageBits.length; channel++) {
+                        // Определяем, встраиваем ли мы в этот пиксель (для адаптивного режима)
+                        let shouldEmbed = true;
+                        let embedStrength = bitsPerChannel;
+                        
+                        if (textureMap) {
+                            const textureValue = textureMap[y * width + x];
+                            shouldEmbed = textureValue > 128; // Встраиваем только в текстурные области
+                            
+                            // Регулируем глубину внедрения в зависимости от текстурности
+                            if (shouldEmbed) {
+                                embedStrength = Math.min(4, Math.max(1, Math.floor(textureValue / 64)));
+                            }
+                        }
+                        
+                        if (shouldEmbed) {
+                            // Встраиваем несколько бит в канал
+                            let channelValue = data[pixelIndex + channel];
+                            for (let bit = 0; bit < embedStrength && bitIndex < messageBits.length; bit++) {
+                                const bitMask = 1 << bit;
+                                channelValue = (channelValue & ~bitMask) | (messageBits[bitIndex++] << bit);
+                            }
+                            data[pixelIndex + channel] = channelValue;
+                        }
+                    }
+                }
+            }
+            
+            function extractBits(imageData, positions, bitsPerChannel) {
+                const data = imageData.data;
+                const width = imageData.width;
+                const extractedBits = [];
+                
+                for (let i = 0; i < positions.length; i++) {
+                    const pos = positions[i];
+                    const x = pos % width;
+                    const y = Math.floor(pos / width);
+                    const pixelIndex = (y * width + x) * 4;
+                    
+                    for (let channel = 0; channel < 3; channel++) {
+                        const channelValue = data[pixelIndex + channel];
+                        for (let bit = 0; bit < bitsPerChannel; bit++) {
+                            const bitValue = (channelValue >> bit) & 1;
+                            extractedBits.push(bitValue);
+                            
+                            // Проверяем на окончание сообщения (32 нулевых бита)
+                            if (extractedBits.length >= 32) {
+                                const last32Bits = extractedBits.slice(-32);
+                                if (last32Bits.every(bit => bit === 0)) {
+                                    return extractedBits;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return extractedBits;
+            }
+            
+            function addNoise(imageData, intensity, textureMap) {
+                const data = imageData.data;
+                const width = imageData.width;
+                const noiseIntensity = Math.floor(intensity * 10);
                 
                 for (let i = 0; i < data.length; i += 4) {
                     const pixelIndex = i / 4;
@@ -1260,8 +1338,7 @@
                 }
             }
             
-            function applyAdvancedAntiAnalysis(imageData, textureMap) {
-                // Профессиональная защита от стегоанализа
+            function applyAntiAnalysis(imageData, textureMap) {
                 // Сохранение статистических характеристик изображения
                 const data = imageData.data;
                 const width = imageData.width;
@@ -1481,7 +1558,6 @@
                 // 3. Анализ гистограммы с вычислением энтропии
                 const histogramResult = analyzeHistogramEntropy(data);
                 updateAnalysisResult('histogram', histogramResult, 65);
-                visualizeHistogram(data);
                 
                 // 4. Анализ шума с использованием вейвлет-преобразования
                 const noiseResult = analyzeNoisePatterns(data, width, height);
@@ -1498,32 +1574,32 @@
                     document.getElementById('overall-progress').style.width = `${overallScore}%`;
                     
                     if (overallScore >= 80) {
-                        document.getElementById('overall-score').className = 'risk-high';
+                        document.getElementById('overall-score').className = 'ios-risk-high';
                     } else if (overallScore >= 50) {
-                        document.getElementById('overall-score').className = 'risk-medium';
+                        document.getElementById('overall-score').className = 'ios-risk-medium';
                     } else {
-                        document.getElementById('overall-score').className = 'risk-low';
+                        document.getElementById('overall-score').className = 'ios-risk-low';
                     }
                     
                     // Рекомендации
                     let recommendations = '';
                     if (overallScore < 40) {
                         recommendations = `
-                            <div class="recommendation">Используйте адаптивное внедрение для лучшей маскировки</div>
-                            <div class="recommendation">Уменьшите глубину внедрения до 1-2 бит на канал</div>
-                            <div class="recommendation">Добавьте маскирующий шум (15-25%)</div>
-                            <div class="recommendation">Включите защиту от стегоанализа</div>
+                            <div class="ios-recommendation">Используйте адаптивное внедрение для лучшей маскировки</div>
+                            <div class="ios-recommendation">Уменьшите глубину внедрения до 1-2 бит на канал</div>
+                            <div class="ios-recommendation">Добавьте маскирующий шум (15-25%)</div>
+                            <div class="ios-recommendation">Включите защиту от стегоанализа</div>
                         `;
                     } else if (overallScore < 70) {
                         recommendations = `
-                            <div class="recommendation">Используйте случайное распределение данных</div>
-                            <div class="recommendation">Добавьте маскирующий шум (10-15%)</div>
-                            <div class="recommendation">Ограничьте объем скрываемых данных</div>
+                            <div class="ios-recommendation">Используйте случайное распределение данных</div>
+                            <div class="ios-recommendation">Добавьте маскирующий шум (10-15%)</div>
+                            <div class="ios-recommendation">Ограничьте объем скрываемых данных</div>
                         `;
                     } else {
                         recommendations = `
-                            <div class="recommendation">Отличная стойкость! Продолжайте использовать текущие настройки</div>
-                            <div class="recommendation">Рассмотрите возможность использования DCT-метода для JPEG</div>
+                            <div class="ios-recommendation">Отличная стойкость! Продолжайте использовать текущие настройки</div>
+                            <div class="ios-recommendation">Рассмотрите возможность использования DCT-метода для JPEG</div>
                         `;
                     }
                     
@@ -1639,29 +1715,6 @@
                 return Math.round(normalizedEntropy);
             }
             
-            function visualizeHistogram(data) {
-                // Визуализация гистограммы
-                const histogram = new Array(64).fill(0);
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    for (let j = 0; j < 3; j++) {
-                        const bin = Math.floor(data[i + j] / 4);
-                        histogram[bin]++;
-                    }
-                }
-                
-                // Нормализуем значения для отображения
-                const max = Math.max(...histogram);
-                histogramBars.innerHTML = '';
-                
-                for (let i = 0; i < 64; i++) {
-                    const bar = document.createElement('div');
-                    bar.className = 'histogram-bar';
-                    bar.style.height = `${(histogram[i] / max) * 100}%`;
-                    histogramBars.appendChild(bar);
-                }
-            }
-            
             function analyzeNoisePatterns(data, width, height) {
                 // Анализ шумовых характеристик с использованием вейвлет-преобразования
                 let noiseLevel = 0;
@@ -1765,17 +1818,12 @@
                 progressBar.style.width = `${progress}%`;
                 
                 if (value >= 80) {
-                    element.className = 'risk-high';
+                    element.className = 'ios-risk-high';
                 } else if (value >= 50) {
-                    element.className = 'risk-medium';
+                    element.className = 'ios-risk-medium';
                 } else {
-                    element.className = 'risk-low';
+                    element.className = 'ios-risk-low';
                 }
-            }
-            
-            function showStatus(element, message, type) {
-                element.textContent = message;
-                element.className = 'status ' + type;
             }
         });
     </script>
