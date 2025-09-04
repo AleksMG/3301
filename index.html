@@ -17,27 +17,20 @@
             --linux-success: #6ac76a;
             --linux-warning: #d9a85f;
             --linux-error: #d16868;
-            --linux-scrollbar: #555555;
-            --linux-scrollbar-thumb: #888888;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', sans-serif;
+            font-family: 'DejaVu Sans', 'Ubuntu', sans-serif;
             background-color: var(--linux-bg);
             color: var(--linux-text);
             line-height: 1.5;
-            min-height: 100vh;
             padding: 0;
-            display: flex;
-            flex-direction: column;
         }
 
         .linux-header {
@@ -54,37 +47,10 @@
             font-size: 16px;
         }
 
-        .linux-window-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .linux-control {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .linux-control.close {
-            background-color: #ff5f56;
-        }
-
-        .linux-control.minimize {
-            background-color: #ffbd2e;
-        }
-
-        .linux-control.maximize {
-            background-color: #27c93f;
-        }
-
         .linux-container {
-            flex: 1;
-            overflow-y: auto;
             padding: 16px;
             max-width: 1000px;
             margin: 0 auto;
-            width: 100%;
         }
 
         .linux-card {
@@ -99,7 +65,6 @@
             font-weight: bold;
             font-size: 15px;
             margin-bottom: 12px;
-            color: var(--linux-text);
             display: flex;
             align-items: center;
             border-bottom: 1px solid var(--linux-border);
@@ -108,29 +73,6 @@
 
         .linux-card-title i {
             margin-right: 8px;
-            font-size: 14px;
-        }
-
-        .linux-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--linux-border);
-            margin-bottom: 16px;
-        }
-
-        .linux-tab {
-            padding: 8px 16px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            margin-right: 4px;
-            background-color: var(--linux-card-bg);
-        }
-
-        .linux-tab.active {
-            background-color: var(--linux-header-bg);
-            border-color: var(--linux-border);
-            color: var(--linux-accent);
         }
 
         .linux-input {
@@ -142,12 +84,6 @@
             font-size: 14px;
             margin-bottom: 12px;
             color: var(--linux-text);
-            font-family: inherit;
-        }
-
-        .linux-input:focus {
-            outline: none;
-            border-color: var(--linux-accent);
         }
 
         .linux-textarea {
@@ -161,12 +97,6 @@
             margin-bottom: 12px;
             resize: vertical;
             color: var(--linux-text);
-            font-family: inherit;
-        }
-
-        .linux-textarea:focus {
-            outline: none;
-            border-color: var(--linux-accent);
         }
 
         .linux-file-input {
@@ -185,17 +115,6 @@
             cursor: pointer;
         }
 
-        .linux-file-label:hover {
-            border-color: var(--linux-accent);
-        }
-
-        .linux-file-label i {
-            font-size: 24px;
-            color: var(--linux-border);
-            margin-bottom: 8px;
-            display: block;
-        }
-
         .linux-button {
             display: block;
             width: 100%;
@@ -205,51 +124,12 @@
             border: none;
             border-radius: 4px;
             font-size: 14px;
-            font-weight: bold;
             margin-bottom: 12px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
         .linux-button:hover {
             background-color: var(--linux-accent-hover);
-        }
-
-        .linux-button.secondary {
-            background-color: var(--linux-card-bg);
-            color: var(--linux-text);
-            border: 1px solid var(--linux-border);
-        }
-
-        .linux-button.secondary:hover {
-            background-color: var(--linux-bg);
-        }
-
-        .linux-button.warning {
-            background-color: var(--linux-warning);
-        }
-
-        .linux-button.warning:hover {
-            background-color: #e0b874;
-        }
-
-        .linux-image-preview {
-            width: 100%;
-            height: 200px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 12px;
-            background-color: var(--linux-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--linux-border);
-        }
-
-        .linux-image-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
         }
 
         .linux-alert {
@@ -284,240 +164,25 @@
             border-left-color: var(--linux-accent);
         }
 
-        .linux-alert.warning {
-            background-color: rgba(217, 168, 95, 0.15);
-            color: var(--linux-warning);
-            border-left-color: var(--linux-warning);
-        }
-
-        .linux-slider-container {
-            margin-bottom: 16px;
-        }
-
-        .linux-slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--linux-text);
-        }
-
-        .linux-slider {
-            -webkit-appearance: none;
+        .linux-image-preview {
             width: 100%;
-            height: 5px;
-            background: var(--linux-border);
-            border-radius: 5px;
-            outline: none;
-        }
-
-        .linux-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--linux-accent);
-            cursor: pointer;
+            height: 200px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            background-color: var(--linux-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: 1px solid var(--linux-border);
         }
 
-        .linux-toggle {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+        .linux-image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        .linux-toggle-label {
-            font-size: 14px;
-        }
-
-        .linux-toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-
-        .linux-toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .linux-toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--linux-border);
-            transition: .4s;
-            border-radius: 20px;
-        }
-
-        .linux-toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .linux-toggle-slider {
-            background-color: var(--linux-accent);
-        }
-
-        input:checked + .linux-toggle-slider:before {
-            transform: translateX(20px);
-        }
-
-        .linux-progress-bar {
-            width: 100%;
-            height: 6px;
-            background-color: var(--linux-border);
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-
-        .linux-progress {
-            height: 100%;
-            background-color: var(--linux-accent);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-
-        .linux-risk-low {
-            color: var(--linux-success);
-        }
-
-        .linux-risk-medium {
-            color: var(--linux-warning);
-        }
-
-        .linux-risk-high {
-            color: var(--linux-error);
-        }
-
-        .linux-tab-content {
-            display: none;
-        }
-
-        .linux-tab-content.active {
-            display: block;
-        }
-
-        .linux-detail-text {
-            font-size: 13px;
-            color: #999;
-            margin-top: 4px;
-        }
-
-        .linux-list {
-            list-style: none;
-        }
-
-        .linux-list-item {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--linux-border);
-        }
-
-        .linux-list-item:last-child {
-            border-bottom: none;
-        }
-
-        .linux-badge {
-            display: inline-block;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .linux-badge.primary {
-            background-color: rgba(74, 140, 190, 0.2);
-            color: var(--linux-accent);
-        }
-
-        .linux-badge.green {
-            background-color: rgba(106, 199, 106, 0.2);
-            color: var(--linux-success);
-        }
-
-        .linux-badge.orange {
-            background-color: rgba(217, 168, 95, 0.2);
-            color: var(--linux-warning);
-        }
-
-        .linux-controls-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        @media (min-width: 768px) {
-            .linux-controls-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .linux-recommendation {
-            padding: 8px 0;
-            color: #999;
-            font-size: 13px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--linux-scrollbar);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--linux-scrollbar-thumb);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #aaa;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .slide-in {
-            animation: slideIn 0.3s ease;
-        }
-
-        .terminal-style {
-            background-color: #1e1e1e;
-            color: #d0d0d0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 13px;
-            border: 1px solid #333;
-        }
-        
         .debug-panel {
             margin-top: 20px;
             padding: 15px;
@@ -533,143 +198,67 @@
 <body>
     <div class="linux-header">
         <div class="linux-title">CryptoStego</div>
-        <div class="linux-window-controls">
-            <div class="linux-control close"></div>
-            <div class="linux-control minimize"></div>
-            <div class="linux-control maximize"></div>
-        </div>
     </div>
 
     <div class="linux-container">
         <div class="linux-card">
-            <div class="linux-tabs">
-                <div class="linux-tab active" data-tab="stegano">Стеганография</div>
-                <div class="linux-tab" data-tab="analysis">Анализ</div>
-                <div class="linux-tab" data-tab="detection">Обнаружение</div>
-            </div>
-
-            <div class="linux-tab-content active" id="stegano-tab">
-                <div class="linux-controls-grid">
-                    <div class="linux-card">
-                        <div class="linux-card-title"><i class="fas fa-lock"></i> Сокрытие сообщения</div>
-                        
-                        <label class="linux-file-label" for="image-input">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <div>Выберите изображение</div>
-                            <div class="linux-detail-text">PNG или JPG, до 10 МБ</div>
-                        </label>
-                        <input type="file" id="image-input" class="linux-file-input" accept="image/*">
-                        
-                        <div class="linux-image-preview">
-                            <img id="original-image" src="" alt="Оригинальное изображение" style="display: none;">
-                            <i class="fas fa-image" style="font-size: 40px; color: #555;"></i>
-                        </div>
-                        
-                        <textarea class="linux-textarea terminal-style" id="message" placeholder="Введите текст для скрытия..."></textarea>
-                        
-                        <input type="password" class="linux-input terminal-style" id="password" placeholder="Ключ шифрования">
-                        
-                        <button class="linux-button" id="encode-btn">
-                            <i class="fas fa-shield-alt"></i> Скрыть сообщение
-                        </button>
-                        
-                        <button class="linux-button secondary" id="analyze-btn">
-                            <i class="fas fa-chart-bar"></i> Анализировать изображение
-                        </button>
-                        
-                        <div id="encode-status" class="linux-alert info" style="display: none;">
-                            <i class="fas fa-info-circle"></i> Готов к работе
-                        </div>
-                    </div>
-                    
-                    <div class="linux-card">
-                        <div class="linux-card-title"><i class="fas fa-unlock"></i> Извлечение сообщения</div>
-                        
-                        <label class="linux-file-label" for="stego-image-input">
-                            <i class="fas fa-file-image"></i>
-                            <div>Выберите изображение</div>
-                            <div class="linux-detail-text">Содержащее скрытое сообщение</div>
-                        </label>
-                        <input type="file" id="stego-image-input" class="linux-file-input" accept="image/*">
-                        
-                        <input type="password" class="linux-input terminal-style" id="decode-password" placeholder="Ключ шифрования">
-                        
-                        <button class="linux-button" id="decode-btn">
-                            <i class="fas fa-search"></i> Извлечь сообщение
-                        </button>
-                        
-                        <textarea class="linux-textarea terminal-style" id="decoded-message" readonly placeholder="Извлеченное сообщение появится здесь"></textarea>
-                        
-                        <div id="decode-status" class="linux-alert info" style="display: none;">
-                            <i class="fas fa-info-circle"></i> Ожидание изображения
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="linux-card">
-                    <div class="linux-card-title"><i class="fas fa-sliders-h"></i> Расширенные настройки</div>
-                    
-                    <div class="linux-slider-container">
-                        <div class="linux-slider-label">
-                            <span>Глубина внедрения: <span id="bit-depth-value">1</span> бит</span>
-                            <span class="linux-detail-text">Скрытность ↔ Вместимость</span>
-                        </div>
-                        <input type="range" min="1" max="4" value="1" class="linux-slider" id="bit-depth">
-                    </div>
-                    
-                    <div class="linux-slider-container">
-                        <div class="linux-slider-label">
-                            <span>Уровень шума: <span id="noise-level-value">10</span>%</span>
-                            <span class="linux-detail-text">Маскировка ↔ Качество</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="10" class="linux-slider" id="noise-level">
-                    </div>
-                    
-                    <div class="linux-toggle">
-                        <span class="linux-toggle-label">Адаптивное внедрение</span>
-                        <label class="linux-toggle-switch">
-                            <input type="checkbox" id="adaptive-embedding" checked>
-                            <span class="linux-toggle-slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="linux-toggle">
-                        <span class="linux-toggle-label">Случайное распределение</span>
-                        <label class="linux-toggle-switch">
-                            <input type="checkbox" id="random-distribution" checked>
-                            <span class="linux-toggle-slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="linux-toggle">
-                        <span class="linux-toggle-label">Защита от анализа</span>
-                        <label class="linux-toggle-switch">
-                            <input type="checkbox" id="anti-analysis" checked>
-                            <span class="linux-toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="linux-card">
-                    <div class="linux-card-title"><i class="fas fa-bug"></i> Отладочная информация</div>
-                    <div class="debug-panel" id="debug-output">
-                        Готов к работе...
-                    </div>
-                </div>
+            <div class="linux-card-title"><i class="fas fa-lock"></i> Сокрытие сообщения</div>
+            
+            <label class="linux-file-label" for="image-input">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div>Выберите изображение</div>
+            </label>
+            <input type="file" id="image-input" class="linux-file-input" accept="image/*">
+            
+            <div class="linux-image-preview">
+                <img id="original-image" src="" alt="Оригинальное изображение" style="display: none;">
+                <i class="fas fa-image" style="font-size: 40px; color: #555;"></i>
             </div>
             
-            <div class="linux-tab-content" id="analysis-tab">
-                <!-- Анализ стойкости (оставлен без изменений) -->
-            </div>
+            <textarea class="linux-textarea" id="message" placeholder="Введите текст для скрытия..."></textarea>
             
-            <div class="linux-tab-content" id="detection-tab">
-                <!-- Методы обнаружения (оставлен без изменений) -->
+            <input type="password" class="linux-input" id="password" placeholder="Ключ шифрования">
+            
+            <button class="linux-button" id="encode-btn">
+                <i class="fas fa-shield-alt"></i> Скрыть сообщение
+            </button>
+            
+            <div id="encode-status" class="linux-alert info" style="display: none;">
+                <i class="fas fa-info-circle"></i> Готов к работе
+            </div>
+        </div>
+        
+        <div class="linux-card">
+            <div class="linux-card-title"><i class="fas fa-unlock"></i> Извлечение сообщения</div>
+            
+            <label class="linux-file-label" for="stego-image-input">
+                <i class="fas fa-file-image"></i>
+                <div>Выберите изображение со скрытым сообщением</div>
+            </label>
+            <input type="file" id="stego-image-input" class="linux-file-input" accept="image/*">
+            
+            <input type="password" class="linux-input" id="decode-password" placeholder="Ключ шифрования">
+            
+            <button class="linux-button" id="decode-btn">
+                <i class="fas fa-search"></i> Извлечь сообщение
+            </button>
+            
+            <textarea class="linux-textarea" id="decoded-message" readonly placeholder="Извлеченное сообщение появится здесь"></textarea>
+            
+            <div id="decode-status" class="linux-alert info" style="display: none;">
+                <i class="fas fa-info-circle"></i> Ожидание изображения
+            </div>
+        </div>
+        
+        <div class="linux-card">
+            <div class="linux-card-title"><i class="fas fa-bug"></i> Отладочная информация</div>
+            <div class="debug-panel" id="debug-output">
+                Готов к работе...
             </div>
         </div>
     </div>
 
     <script>
-        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
             const debugOutput = document.getElementById('debug-output');
             
@@ -677,37 +266,6 @@
                 debugOutput.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
                 debugOutput.scrollTop = debugOutput.scrollHeight;
             }
-            
-            // Управление табами
-            const tabs = document.querySelectorAll('.linux-tab');
-            const tabContents = document.querySelectorAll('.linux-tab-content');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    
-                    // Активируем выбранную вкладку
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(tc => tc.classList.remove('active'));
-                    
-                    tab.classList.add('active');
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-                });
-            });
-            
-            // Обновление значений слайдеров
-            const bitDepthSlider = document.getElementById('bit-depth');
-            const bitDepthValue = document.getElementById('bit-depth-value');
-            const noiseLevelSlider = document.getElementById('noise-level');
-            const noiseLevelValue = document.getElementById('noise-level-value');
-            
-            bitDepthSlider.addEventListener('input', function() {
-                bitDepthValue.textContent = this.value;
-            });
-            
-            noiseLevelSlider.addEventListener('input', function() {
-                noiseLevelValue.textContent = this.value;
-            });
             
             // Обработка выбора файлов
             const fileInputs = document.querySelectorAll('.linux-file-input');
@@ -719,36 +277,32 @@
                     if (file) {
                         label.querySelector('div').textContent = file.name;
                         
-                        // Если это изображение, показываем превью
-                        if (input.id === 'image-input' || input.id === 'stego-image-input') {
-                            const reader = new FileReader();
-                            reader.onload = function(event) {
-                                const img = document.getElementById(input.id === 'image-input' ? 'original-image' : 'stego-image');
-                                if (!img) {
-                                    const newImg = document.createElement('img');
-                                    newImg.id = input.id === 'image-input' ? 'original-image' : 'stego-image';
-                                    newImg.src = event.target.result;
-                                    newImg.alt = "Загруженное изображение";
-                                    newImg.style.display = 'block';
-                                    label.nextElementSibling.appendChild(newImg);
-                                } else {
-                                    img.src = event.target.result;
-                                    img.style.display = 'block';
-                                }
-                                
-                                // Скрываем иконку placeholder
-                                const placeholderIcon = label.nextElementSibling.querySelector('i');
-                                if (placeholderIcon) {
-                                    placeholderIcon.style.display = 'none';
-                                }
-                            };
-                            reader.readAsDataURL(file);
-                        }
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = document.getElementById(input.id === 'image-input' ? 'original-image' : 'stego-image');
+                            if (!img) {
+                                const newImg = document.createElement('img');
+                                newImg.id = input.id === 'image-input' ? 'original-image' : 'stego-image';
+                                newImg.src = event.target.result;
+                                newImg.alt = "Загруженное изображение";
+                                newImg.style.display = 'block';
+                                label.nextElementSibling.appendChild(newImg);
+                            } else {
+                                img.src = event.target.result;
+                                img.style.display = 'block';
+                            }
+                            
+                            const placeholderIcon = label.nextElementSibling.querySelector('i');
+                            if (placeholderIcon) {
+                                placeholderIcon.style.display = 'none';
+                            }
+                        };
+                        reader.readAsDataURL(file);
                     }
                 });
             });
             
-            // Кодирование сообщения в изображение
+            // Кодирование сообщения
             document.getElementById('encode-btn').addEventListener('click', async function() {
                 const imageInput = document.getElementById('image-input');
                 const messageInput = document.getElementById('message');
@@ -774,15 +328,6 @@
                 status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс скрытия сообщения...';
                 
                 try {
-                    // Получаем настройки
-                    const bitsPerChannel = parseInt(bitDepthSlider.value);
-                    const noiseLevel = parseInt(noiseLevelSlider.value) / 100;
-                    const useAdaptive = document.getElementById('adaptive-embedding').checked;
-                    const useRandom = document.getElementById('random-distribution').checked;
-                    const useAntiAnalysis = document.getElementById('anti-analysis').checked;
-                    
-                    logDebug(`Начинаем кодирование: бит/канал=${bitsPerChannel}, шум=${noiseLevel}`);
-                    
                     // Загружаем изображение
                     const imageFile = imageInput.files[0];
                     const imageData = await loadImageData(imageFile);
@@ -792,7 +337,15 @@
                     const encryptedMessage = await encryptMessage(messageInput.value, passwordInput.value);
                     logDebug(`Сообщение зашифровано: ${encryptedMessage.length} байт`);
                     
-                    // Преобразуем сообщение в битовый массив
+                    // Вычисляем общее количество бит
+                    const totalBits = encryptedMessage.length * 8;
+                    logDebug(`Требуется бит для записи: ${totalBits}`);
+                    
+                    // Генерируем позиции для ВСЕХ битов
+                    const positions = generatePositions(imageData, totalBits, passwordInput.value);
+                    logDebug(`Сгенерировано позиций: ${positions.length}`);
+                    
+                    // Преобразуем сообщение в биты
                     const messageBits = [];
                     for (let byte of encryptedMessage) {
                         for (let i = 7; i >= 0; i--) {
@@ -800,50 +353,21 @@
                         }
                     }
                     
-                    logDebug(`Сообщение преобразовано в биты: ${messageBits.length} бит`);
-                    
-                    // Добавляем маркер конца сообщения
-                    for (let i = 0; i < 32; i++) {
-                        messageBits.push(0);
-                    }
-                    
-                    // Генерируем позиции для внедрения
-                    const positions = generatePositions(imageData, messageBits.length, useRandom ? passwordInput.value : null);
-                    logDebug(`Сгенерировано позиций для внедрения: ${positions.length}`);
-                    
-                    // Анализируем текстуру изображения (если включено адаптивное внедрение)
-                    let textureMap = null;
-                    if (useAdaptive) {
-                        textureMap = analyzeTexture(imageData);
-                        logDebug(`Анализ текстуры завершен`);
-                    }
-                    
                     // Встраиваем сообщение
-                    embedMessage(imageData, messageBits, positions, bitsPerChannel, textureMap);
+                    embedMessage(imageData, messageBits, positions, 1);
                     logDebug(`Сообщение внедрено в изображение`);
-                    
-                    // Добавляем маскирующий шум
-                    if (noiseLevel > 0) {
-                        addNoise(imageData, noiseLevel, textureMap);
-                        logDebug(`Добавлен маскирующий шум: ${noiseLevel * 100}%`);
-                    }
-                    
-                    // Применяем защиту от стегоанализа
-                    if (useAntiAnalysis) {
-                        applyAntiAnalysis(imageData, textureMap);
-                        logDebug(`Применена защита от стегоанализа`);
-                    }
                     
                     // Сохраняем результат
                     const resultImage = await saveImageData(imageData);
                     const link = document.createElement('a');
-                    link.download = 'secure-stego-image.png';
+                    link.download = 'stego-image.png';
                     link.href = resultImage;
                     link.click();
                     
                     status.className = 'linux-alert success';
-                    status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно скрыто! Файл сохранен.';
+                    status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно скрыто!';
                     logDebug(`Кодирование завершено успешно!`);
+                    
                 } catch (error) {
                     status.className = 'linux-alert error';
                     status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
@@ -851,7 +375,7 @@
                 }
             });
             
-            // Декодирование сообщения из изображения
+            // Декодирование сообщения
             document.getElementById('decode-btn').addEventListener('click', async function() {
                 const imageInput = document.getElementById('stego-image-input');
                 const passwordInput = document.getElementById('decode-password');
@@ -867,70 +391,64 @@
                 status.style.display = 'flex';
                 status.className = 'linux-alert info';
                 status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Идет процесс извлечения сообщения...';
-                logDebug(`Начинаем процесс извлечения сообщения`);
                 
                 try {
-                    // Получаем настройки
-                    const bitsPerChannel = parseInt(bitDepthSlider.value);
-                    const useRandom = document.getElementById('random-distribution').checked;
-                    
-                    logDebug(`Параметры извлечения: бит/канал=${bitsPerChannel}, случайное распределение=${useRandom}`);
-                    
                     // Загружаем изображение
                     const imageFile = imageInput.files[0];
                     const imageData = await loadImageData(imageFile);
                     logDebug(`Изображение загружено: ${imageData.width}x${imageData.height} пикселей`);
                     
-                    // Генерируем позиции для извлечения (оцениваем максимально возможное количество)
-                    const estimatedBits = imageData.width * imageData.height * 3 * bitsPerChannel;
-                    const positions = generatePositions(imageData, estimatedBits, useRandom ? passwordInput.value : null);
-                    logDebug(`Сгенерировано позиций для извлечения: ${positions.length}`);
+                    // Пытаемся извлечь сообщение с разной длиной
+                    let decryptedMessage = null;
+                    let found = false;
                     
-                    // Извлекаем биты
-                    const extractedBits = extractBits(imageData, positions, bitsPerChannel);
-                    logDebug(`Извлечено бит: ${extractedBits.length}`);
-                    
-                    // Ищем маркер конца сообщения
-                    let endIndex = -1;
-                    for (let i = 0; i < extractedBits.length - 31; i++) {
-                        if (extractedBits.slice(i, i + 32).every(bit => bit === 0)) {
-                            endIndex = i;
-                            break;
-                        }
-                    }
-                    
-                    if (endIndex === -1) {
-                        logDebug(`Маркер конца сообщения не найден`);
-                        throw new Error('Не удалось найти конец сообщения. Возможно, неверный ключ или изображение не содержит сообщения.');
-                    }
-                    
-                    logDebug(`Маркер конца сообщения найден на позиции: ${endIndex}`);
-                    
-                    // Обрезаем биты до конца сообщения
-                    const messageBits = extractedBits.slice(0, endIndex);
-                    logDebug(`Длина сообщения после обрезки: ${messageBits.length} бит`);
-                    
-                    // Конвертируем биты в байты
-                    const bytes = [];
-                    for (let i = 0; i < messageBits.length; i += 8) {
-                        if (i + 8 > messageBits.length) break;
+                    // Пробуем разные длины сообщения
+                    for (let length = 100; length <= 10000; length += 100) {
+                        if (found) break;
                         
-                        let byte = 0;
-                        for (let j = 0; j < 8; j++) {
-                            byte = (byte << 1) | messageBits[i + j];
+                        try {
+                            const bitsToExtract = length * 8;
+                            logDebug(`Пробуем извлечь ${bitsToExtract} бит...`);
+                            
+                            // Генерируем позиции для извлечения
+                            const positions = generatePositions(imageData, bitsToExtract, passwordInput.value);
+                            
+                            // Извлекаем биты
+                            const extractedBits = extractBits(imageData, positions, 1);
+                            
+                            // Конвертируем в байты
+                            const bytes = [];
+                            for (let i = 0; i < extractedBits.length; i += 8) {
+                                if (i + 8 > extractedBits.length) break;
+                                
+                                let byte = 0;
+                                for (let j = 0; j < 8; j++) {
+                                    byte = (byte << 1) | extractedBits[i + j];
+                                }
+                                bytes.push(byte);
+                            }
+                            
+                            // Пытаемся расшифровать
+                            decryptedMessage = await decryptMessage(bytes, passwordInput.value);
+                            found = true;
+                            logDebug(`Сообщение найдено! Длина: ${length} байт`);
+                            break;
+                            
+                        } catch (e) {
+                            // Продолжаем尝试其他长度
+                            continue;
                         }
-                        bytes.push(byte);
                     }
                     
-                    logDebug(`Сообщение преобразовано в байты: ${bytes.length} байт`);
+                    if (!found) {
+                        throw new Error('Не удалось извлечь сообщение. Возможно, неверный ключ.');
+                    }
                     
-                    // Дешифруем сообщение
-                    const decryptedMessage = await decryptMessage(bytes, passwordInput.value);
                     document.getElementById('decoded-message').value = decryptedMessage;
-                    
                     status.className = 'linux-alert success';
                     status.innerHTML = '<i class="fas fa-check-circle"></i> Сообщение успешно извлечено!';
-                    logDebug(`Сообщение успешно извлечено и расшифровано: ${decryptedMessage.length} символов`);
+                    logDebug(`Сообщение извлечено: ${decryptedMessage.length} символов`);
+                    
                 } catch (error) {
                     status.className = 'linux-alert error';
                     status.innerHTML = `<i class="fas fa-exclamation-circle"></i> Ошибка: ${error.message}`;
@@ -938,8 +456,7 @@
                 }
             });
             
-            // Профессиональные функции стеганографии
-            
+            // Функция загрузки изображения
             async function loadImageData(file) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -957,6 +474,7 @@
                 });
             }
             
+            // Функция сохранения изображения
             async function saveImageData(imageData) {
                 const canvas = document.createElement('canvas');
                 canvas.width = imageData.width;
@@ -966,87 +484,57 @@
                 return canvas.toDataURL('image/png');
             }
             
-            function generatePositions(imageData, length, seed) {
+            // Генерация позиций на основе ключа
+            function generatePositions(imageData, numBits, seed) {
                 const positions = [];
                 const totalPixels = imageData.width * imageData.height;
+                const used = new Set();
                 
-                if (seed) {
-                    // Детерминированная последовательность на основе seed
-                    let counter = 0;
-                    const usedPositions = new Set();
+                // Создаем детерминированный генератор на основе ключа
+                let state = hashString(seed);
+                
+                for (let i = 0; i < numBits; i++) {
+                    // Генерируем следующую позицию
+                    state = (state * 9301 + 49297) % 233280;
+                    let pos = Math.floor((state / 233280) * totalPixels);
                     
-                    while (positions.length < Math.min(length, totalPixels)) {
-                        // Генерируем хеш на основе seed и счетчика
-                        const hash = simpleHash(seed + counter.toString());
-                        const position = Math.abs(hash) % totalPixels;
-                        
-                        if (!usedPositions.has(position)) {
-                            positions.push(position);
-                            usedPositions.add(position);
+                    // Убеждаемся, что позиция уникальна
+                    let attempts = 0;
+                    while (used.has(pos) && attempts < 100) {
+                        state = (state * 9301 + 49297) % 233280;
+                        pos = Math.floor((state / 233280) * totalPixels);
+                        attempts++;
+                    }
+                    
+                    if (attempts >= 100) {
+                        // Если не можем найти уникальную позицию, используем следующую доступную
+                        for (let p = 0; p < totalPixels; p++) {
+                            if (!used.has(p)) {
+                                pos = p;
+                                break;
+                            }
                         }
-                        
-                        counter++;
-                        // Защита от бесконечного цикла - ограничиваем максимальным количеством пикселей
-                        if (counter > totalPixels * 2) break;
                     }
-                } else {
-                    // Последовательное распределение
-                    const maxPositions = Math.min(length, totalPixels);
-                    for (let i = 0; i < maxPositions; i++) {
-                        positions.push(i % totalPixels);
-                    }
+                    
+                    positions.push(pos);
+                    used.add(pos);
                 }
                 
                 return positions;
             }
             
-            function simpleHash(str) {
+            // Хеш-функция для строки
+            function hashString(str) {
                 let hash = 0;
                 for (let i = 0; i < str.length; i++) {
                     hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                    hash |= 0; // Convert to 32bit integer
+                    hash |= 0;
                 }
-                return hash;
+                return Math.abs(hash);
             }
             
-            function analyzeTexture(imageData) {
-                const width = imageData.width;
-                const height = imageData.height;
-                const data = imageData.data;
-                const textureMap = new Uint8Array(width * height);
-                
-                // Простой анализ текстуры на основе вариации интенсивности
-                for (let y = 1; y < height - 1; y++) {
-                    for (let x = 1; x < width - 1; x++) {
-                        let variance = 0;
-                        let centerIdx = (y * width + x) * 4;
-                        let centerValue = (data[centerIdx] + data[centerIdx+1] + data[centerIdx+2]) / 3;
-                        
-                        // Проверяем 8 соседей
-                        for (let dy = -1; dy <= 1; dy++) {
-                            for (let dx = -1; dx <= 1; dx++) {
-                                if (dx === 0 && dy === 0) continue;
-                                
-                                const nX = x + dx;
-                                const nY = y + dy;
-                                
-                                if (nX >= 0 && nX < width && nY >= 0 && nY < height) {
-                                    const nIdx = (nY * width + nX) * 4;
-                                    const nValue = (data[nIdx] + data[nIdx+1] + data[nIdx+2]) / 3;
-                                    variance += Math.abs(nValue - centerValue);
-                                }
-                            }
-                        }
-                        
-                        // Нормализуем variance к 0-255
-                        textureMap[y * width + x] = Math.min(255, Math.max(0, variance / 8 * 5));
-                    }
-                }
-                
-                return textureMap;
-            }
-            
-            function embedMessage(imageData, messageBits, positions, bitsPerChannel, textureMap) {
+            // Встраивание сообщения в изображение
+            function embedMessage(imageData, messageBits, positions, bitsPerChannel) {
                 const data = imageData.data;
                 const width = imageData.width;
                 let bitIndex = 0;
@@ -1057,60 +545,41 @@
                     const y = Math.floor(pos / width);
                     const pixelIndex = (y * width + x) * 4;
                     
-                    // Пропускаем прозрачность (альфа-канал)
+                    // Встраиваем в каждый канал (кроме альфа)
                     for (let channel = 0; channel < 3 && bitIndex < messageBits.length; channel++) {
-                        // Определяем, встраиваем ли мы в этот пиксель (для адаптивного режима)
-                        let shouldEmbed = true;
-                        let embedStrength = bitsPerChannel;
+                        let channelValue = data[pixelIndex + channel];
                         
-                        if (textureMap) {
-                            const textureValue = textureMap[y * width + x];
-                            shouldEmbed = textureValue > 128; // Встраиваем только в текстурные области
-                            
-                            // Регулируем глубину внедрения в зависимости от текстурности
-                            if (shouldEmbed) {
-                                embedStrength = Math.min(4, Math.max(1, Math.floor(textureValue / 64)));
-                            }
+                        // Заменяем младшие биты
+                        for (let bit = 0; bit < bitsPerChannel && bitIndex < messageBits.length; bit++) {
+                            const bitMask = 1 << bit;
+                            channelValue = (channelValue & ~bitMask) | (messageBits[bitIndex++] << bit);
                         }
                         
-                        if (shouldEmbed) {
-                            // Встраиваем несколько бит в канал
-                            let channelValue = data[pixelIndex + channel];
-                            for (let bit = 0; bit < embedStrength && bitIndex < messageBits.length; bit++) {
-                                const bitMask = 1 << bit;
-                                channelValue = (channelValue & ~bitMask) | (messageBits[bitIndex++] << bit);
-                            }
-                            data[pixelIndex + channel] = channelValue;
-                        }
+                        data[pixelIndex + channel] = channelValue;
                     }
                 }
             }
             
+            // Извлечение битов из изображения
             function extractBits(imageData, positions, bitsPerChannel) {
                 const data = imageData.data;
                 const width = imageData.width;
                 const extractedBits = [];
                 
-                // Извлекаем биты в правильном порядке
                 for (let i = 0; i < positions.length; i++) {
                     const pos = positions[i];
                     const x = pos % width;
                     const y = Math.floor(pos / width);
                     const pixelIndex = (y * width + x) * 4;
                     
+                    // Извлекаем из каждого канала
                     for (let channel = 0; channel < 3; channel++) {
                         const channelValue = data[pixelIndex + channel];
+                        
+                        // Извлекаем младшие биты
                         for (let bit = 0; bit < bitsPerChannel; bit++) {
                             const bitValue = (channelValue >> bit) & 1;
                             extractedBits.push(bitValue);
-                        }
-                    }
-                    
-                    // Проверяем на окончание сообщения (32 нулевых бита)
-                    if (extractedBits.length >= 32) {
-                        const last32Bits = extractedBits.slice(-32);
-                        if (last32Bits.every(bit => bit === 0)) {
-                            return extractedBits.slice(0, -32); // Убираем маркер конца
                         }
                     }
                 }
@@ -1118,109 +587,33 @@
                 return extractedBits;
             }
             
+            // Шифрование сообщения
             async function encryptMessage(message, password) {
                 const encoder = new TextEncoder();
                 const data = encoder.encode(message);
                 
-                // Генерация ключа из пароля с использованием PBKDF2
-                const keyMaterial = await window.crypto.subtle.importKey(
-                    'raw',
-                    encoder.encode(password),
-                    'PBKDF2',
-                    false,
-                    ['deriveBits', 'deriveKey']
-                );
+                // Используем упрощенное шифрование XOR с ключом
+                const key = encoder.encode(password);
+                const result = new Uint8Array(data.length);
                 
-                const salt = window.crypto.getRandomValues(new Uint8Array(16));
-                const key = await window.crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: salt,
-                        iterations: 100000,
-                        hash: 'SHA-256'
-                    },
-                    keyMaterial,
-                    { name: 'AES-GCM', length: 256 },
-                    false,
-                    ['encrypt']
-                );
-                
-                // Шифрование
-                const iv = window.crypto.getRandomValues(new Uint8Array(12));
-                const encrypted = await window.crypto.subtle.encrypt(
-                    {
-                        name: 'AES-GCM',
-                        iv: iv,
-                        tagLength: 128
-                    },
-                    key,
-                    data
-                );
-                
-                // Объединение соли, IV и зашифрованных данных
-                const result = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-                result.set(salt, 0);
-                result.set(iv, salt.length);
-                result.set(new Uint8Array(encrypted), salt.length + iv.length);
+                for (let i = 0; i < data.length; i++) {
+                    result[i] = data[i] ^ key[i % key.length];
+                }
                 
                 return result;
             }
             
+            // Дешифрование сообщения
             async function decryptMessage(encryptedData, password) {
-                try {
-                    const encoder = new TextEncoder();
-                    
-                    // Извлечение соли, IV и зашифрованных данных
-                    const salt = encryptedData.slice(0, 16);
-                    const iv = encryptedData.slice(16, 28);
-                    const data = encryptedData.slice(28);
-                    
-                    // Генерация ключа из пароля
-                    const keyMaterial = await window.crypto.subtle.importKey(
-                        'raw',
-                        encoder.encode(password),
-                        'PBKDF2',
-                        false,
-                        ['deriveKey']
-                    );
-                    
-                    const key = await window.crypto.subtle.deriveKey(
-                        {
-                            name: 'PBKDF2',
-                            salt: salt,
-                            iterations: 100000,
-                            hash: 'SHA-256'
-                        },
-                        keyMaterial,
-                        { name: 'AES-GCM', length: 256 },
-                        false,
-                        ['decrypt']
-                    );
-                    
-                    // Дешифрование
-                    const decrypted = await window.crypto.subtle.decrypt(
-                        {
-                            name: 'AES-GCM',
-                            iv: iv,
-                            tagLength: 128
-                        },
-                        key,
-                        data
-                    );
-                    
-                    return new TextDecoder().decode(decrypted);
-                } catch (error) {
-                    throw new Error('Неверный ключ или поврежденные данные');
+                const encoder = new TextEncoder();
+                const key = encoder.encode(password);
+                const result = new Uint8Array(encryptedData.length);
+                
+                for (let i = 0; i < encryptedData.length; i++) {
+                    result[i] = encryptedData[i] ^ key[i % key.length];
                 }
-            }
-            
-            // Вспомогательные функции (noise, anti-analysis и т.д.) остаются без изменений
-            function addNoise(imageData, intensity, textureMap) {
-                // Реализация добавления шума
-            }
-            
-            function applyAntiAnalysis(imageData, textureMap) {
-                // Реализация защиты от анализа
+                
+                return new TextDecoder().decode(result);
             }
         });
     </script>
