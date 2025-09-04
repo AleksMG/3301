@@ -510,6 +510,12 @@
                 gap: 16px;
             }
         }
+
+        .ios-recommendation {
+            padding: 8px 0;
+            color: var(--ios-secondary-label);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -711,6 +717,8 @@
                             <div class="ios-progress" id="overall-progress" style="width: 0%"></div>
                         </div>
                     </div>
+                    
+                    <div id="recommendations" style="margin-top: 16px;"></div>
                 </div>
             </div>
             
@@ -721,7 +729,7 @@
                     <div class="ios-list">
                         <div class="ios-list-item">
                             <div>Статистический анализ</div>
-                            <div class="ios-detail-text">Выявление аномалий в распределении значений пикселей</div>
+                            <div class="ios-detail-text">Выявление аномалии в распределении значений пикселей</div>
                             <span class="ios-badge primary">Высокая точность</span>
                         </div>
                         
@@ -1699,7 +1707,7 @@
                     }
                 }
                 
-                // Вычисляем энтропию
+                // Вычисляем энтропии
                 let entropy = 0;
                 for (let i = 0; i < 256; i++) {
                     if (histogram[i] > 0) {
@@ -1814,18 +1822,20 @@
                 const element = document.getElementById(`${type}-result`);
                 const progressBar = document.getElementById(`${type}-progress`);
                 
-                element.textContent = `${value}%`;
-                progressBar.style.width = `${progress}%`;
-                
-                if (value >= 80) {
-                    element.className = 'ios-risk-high';
-                } else if (value >= 50) {
-                    element.className = 'ios-risk-medium';
-                } else {
-                    element.className = 'ios-risk-low';
-                }
+                setTimeout(() => {
+                    element.textContent = `${value}%`;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (value >= 80) {
+                        element.className = 'ios-risk-high';
+                    } else if (value >= 50) {
+                        element.className = 'ios-risk-medium';
+                    } else {
+                        element.className = 'ios-risk-low';
+                    }
+                }, 500);
             }
         });
     </script>
 </body>
-</html>
+    </html>
