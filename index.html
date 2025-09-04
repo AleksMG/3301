@@ -1023,8 +1023,8 @@
                     const imageFile = imageInput.files[0];
                     const imageData = await loadImageData(imageFile);
                     
-                    // Генерируем позиции для извлечения (оцениваем максимально возможное количество)
-                    const estimatedBits = imageData.width * imageData.height * 3 * bitsPerChannel;
+                    // Генерируем позиции для извлечения
+                    const estimatedBits = (imageData.width * imageData.height * 3 * bitsPerChannel) - 32;
                     const positions = generatePositions(imageData, estimatedBits, useRandom ? passwordInput.value : null);
                     
                     // Извлекаем биты
@@ -1144,7 +1144,7 @@
             // Профессиональные функции стеганографии
             
             async function loadImageData(file) {
-                return new Promise((resolve, reject) {
+                return new Promise((resolve, reject) => {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
@@ -1178,7 +1178,7 @@
                     let counter = 0;
                     const usedPositions = new Set();
                     
-                    while (positions.length < Math.min(length, totalPixels)) {
+                    while (positions.length < length) {
                         // Генерируем хеш на основе seed и счетчика
                         const hash = simpleHash(seed + counter.toString());
                         const position = Math.abs(hash) % totalPixels;
@@ -1189,13 +1189,11 @@
                         }
                         
                         counter++;
-                        // Защита от бесконечного цикла - ограничиваем максимальным количеством пикселей
-                        if (counter > totalPixels * 2) break;
+                        if (counter > 10000) break; // Защита от бесконечного цикла
                     }
                 } else {
                     // Последовательное распределение
-                    const maxPositions = Math.min(length, totalPixels);
-                    for (let i = 0; i < maxPositions; i++) {
+                    for (let i = 0; i < length; i++) {
                         positions.push(i % totalPixels);
                     }
                 }
@@ -1294,7 +1292,6 @@
                 const width = imageData.width;
                 const extractedBits = [];
                 
-                // Извлекаем биты в правильном порядке
                 for (let i = 0; i < positions.length; i++) {
                     const pos = positions[i];
                     const x = pos % width;
@@ -1306,14 +1303,14 @@
                         for (let bit = 0; bit < bitsPerChannel; bit++) {
                             const bitValue = (channelValue >> bit) & 1;
                             extractedBits.push(bitValue);
-                        }
-                    }
-                    
-                    // Проверяем на окончание сообщения (32 нулевых бита)
-                    if (extractedBits.length >= 32) {
-                        const last32Bits = extractedBits.slice(-32);
-                        if (last32Bits.every(bit => bit === 0)) {
-                            return extractedBits.slice(0, -32); // Убираем маркер конца
+                            
+                            // Проверяем на окончание сообщения (32 нулевых бита)
+                            if (extractedBits.length >= 32) {
+                                const last32Bits = extractedBits.slice(-32);
+                                if (last32Bits.every(bit => bit === 0)) {
+                                    return extractedBits;
+                                }
+                            }
                         }
                     }
                 }
