@@ -407,31 +407,23 @@
                 const sbox = new Array(256);
                 const inverseSbox = new Map();
                 
-                const hmacKey = await crypto.subtle.importKey(
-                    'raw', encryptionKey,
-                    { name: 'HMAC', hash: 'SHA-512' },
-                    false, ['sign']
-                );
-                
-                // Генерируем ВСЕ возможные уникальные омофоны (4096 комбинаций)
+                // Создаем ВСЕ возможные омофоны (4096 комбинаций)
                 const allHomophones = [];
                 for (let i = 0; i < 64; i++) {
                     for (let j = 0; j < 64; j++) {
-                        // Каждый омофон - это уникальная пара символов Base64
-                        const homophone = BASE64_CHARS[i] + BASE64_CHARS[j];
-                        allHomophones.push(homophone);
+                        allHomophones.push(BASE64_CHARS[i] + BASE64_CHARS[j]);
                     }
                 }
                 
                 // Детерминистически перемешиваем омофоны на основе ключа
-                await this.fastDeterministicShuffle(allHomophones, hmacKey);
+                const shuffledHomophones = await this.deterministicShuffle(allHomophones, encryptionKey);
                 
-                let index = 0;
+                let homophoneIndex = 0;
                 for (let inputByte = 0; inputByte < 256; inputByte++) {
                     sbox[inputByte] = new Array(16);
-                    for (let homophoneIndex = 0; homophoneIndex < 16; homophoneIndex++) {
-                        const homophone = allHomophones[index++ % 4096];
-                        sbox[inputByte][homophoneIndex] = homophone;
+                    for (let i = 0; i < 16; i++) {
+                        const homophone = shuffledHomophones[homophoneIndex++];
+                        sbox[inputByte][i] = homophone;
                         inverseSbox.set(homophone, inputByte);
                     }
                 }
@@ -439,24 +431,32 @@
                 return { sbox, inverseSbox };
             }
             
-            static async fastDeterministicShuffle(array, hmacKey) {
-                let counter = 0;
-                let randomBuffer = new Uint8Array(0);
-                let position = 0;
+            static async deterministicShuffle(array, encryptionKey) {
+                const shuffledArray = [...array];
+                const length = shuffledArray.length;
                 
-                for (let i = array.length - 1; i > 0; i--) {
-                    if (position >= randomBuffer.length - 1) {
-                        const counterData = new Uint8Array([counter++]);
-                        randomBuffer = await crypto.subtle.sign('HMAC', hmacKey, counterData);
-                        position = 0;
-                    }
+                const hmacKey = await crypto.subtle.importKey(
+                    'raw', encryptionKey,
+                    { name: 'HMAC', hash: 'SHA-512' },
+                    false, ['sign']
+                );
+                
+                // Fisher-Yates shuffle с детерминистичными случайными числами
+                for (let i = length - 1; i > 0; i--) {
+                    // Генерируем детерминистичный индекс на основе ключа и позиции
+                    const positionData = new Uint8Array([i >> 8, i & 0xFF]);
+                    const hmacBuffer = await crypto.subtle.sign('HMAC', hmacKey, positionData);
+                    const hmacArray = new Uint8Array(hmacBuffer);
                     
-                    const rand = (randomBuffer[position] << 8) | randomBuffer[position + 1];
-                    position += 2;
+                    // Создаем случайное число из байтов HMAC
+                    const randomValue = (hmacArray[0] << 8) | hmacArray[1];
+                    const j = randomValue % (i + 1);
                     
-                    const j = rand % (i + 1);
-                    [array[i], array[j]] = [array[j], array[i]];
+                    // Меняем местами омофоны
+                    [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
                 }
+                
+                return shuffledArray;
             }
         }
 
@@ -515,11 +515,9 @@
                     let previousBlock = null;
                     
                     if (diffusionMode === 'cbc') {
-                        // Генерируем случайный IV (16 байт)
                         this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
                         previousBlock = new Uint8Array(this.initializationVector);
                         
-                        // Кодируем каждый байт IV в омофон (всегда первый омофон для consistency)
                         for (let i = 0; i < 16; i++) {
                             const ivByte = this.initializationVector[i];
                             const ivHomophone = this.sbox[ivByte][0];
@@ -530,17 +528,14 @@
                     for (let i = 0; i < plaintextBuffer.length; i++) {
                         let byteToEncrypt = plaintextBuffer[i];
                         
-                        // CBC: XOR с соответствующим байтом предыдущего ЗАШИФРОВАННОГО блока
                         if (diffusionMode === 'cbc' && previousBlock) {
                             byteToEncrypt ^= previousBlock[i % 16];
                         }
                         
-                        // Выбираем случайный омофон для байта
                         const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
                         const homophone = this.sbox[byteToEncrypt][randomIndex];
                         homophones.push(homophone);
                         
-                        // Обновляем предыдущий блок для CBC (запоминаем ЗАШИФРОВАННЫЙ байт)
                         if (diffusionMode === 'cbc') {
                             const encryptedByte = this.inverseSbox.get(homophone);
                             previousBlock[i % 16] = encryptedByte;
@@ -557,7 +552,6 @@
 
             async decryptData(encryptedData, diffusionMode = 'cbc') {
                 try {
-                    // Разбиваем на омофоны (по 2 символа)
                     const homophones = [];
                     for (let i = 0; i < encryptedData.length; i += 2) {
                         homophones.push(encryptedData.substring(i, i + 2));
@@ -572,11 +566,9 @@
                             throw new Error('Invalid encrypted data for CBC mode');
                         }
                         
-                        // Первые 16 омофонов - это IV
                         ivHomophones = homophones.slice(0, 16);
                         cipherHomophones = homophones.slice(16);
                         
-                        // Восстанавливаем IV из омофонов
                         this.initializationVector = new Uint8Array(16);
                         for (let i = 0; i < 16; i++) {
                             const homophone = ivHomophones[i];
@@ -592,14 +584,12 @@
                         const homophone = cipherHomophones[i];
                         let decryptedByte = this.inverseSbox.get(homophone);
                         
-                        // CBC: XOR с соответствующим байтом предыдущего ЗАШИФРОВАННОГО блока
                         if (diffusionMode === 'cbc' && previousBlock) {
                             decryptedByte ^= previousBlock[i % 16];
                         }
                         
                         plaintextBuffer[i] = decryptedByte;
                         
-                        // Обновляем предыдущий блок (запоминаем ЗАШИФРОВАННЫЙ байт)
                         if (diffusionMode === 'cbc') {
                             previousBlock[i % 16] = this.inverseSbox.get(homophone);
                         }
