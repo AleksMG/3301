@@ -225,7 +225,15 @@
             }
 
             async createSBoxes(key) {
-                // Создаем 16 S-Box'ов размером 16x256
+                // 1. Генерируем все 65536 омофонов (0x0000 - 0xFFFF)
+                const allOmophones = Array.from({length: 65536}, (_, i) => i);
+                
+                // 2. Перемешиваем массив с использованием ключа
+                await this.shuffleArray(allOmophones, key);
+                
+                // 3. Распределяем по S-Box'ам
+                let omophoneIndex = 0;
+                
                 for (let sboxIndex = 0; sboxIndex < 16; sboxIndex++) {
                     this.sBoxes[sboxIndex] = new Array(16);
                     
@@ -233,13 +241,9 @@
                         this.sBoxes[sboxIndex][x] = new Array(256);
                         
                         for (let y = 0; y < 256; y++) {
-                            // Генерируем 4 омофона для каждой ячейки
-                            const omophones = [
-                                this.generateOmophone(sboxIndex, x, y, 0, key),
-                                this.generateOmophone(sboxIndex, x, y, 1, key),
-                                this.generateOmophone(sboxIndex, x, y, 2, key),
-                                this.generateOmophone(sboxIndex, x, y, 3, key)
-                            ];
+                            // Берем 4 следующих омофона из перемешанного массива
+                            const omophones = allOmophones.slice(omophoneIndex, omophoneIndex + 4);
+                            omophoneIndex += 4;
                             
                             this.sBoxes[sboxIndex][x][y] = omophones;
                             
@@ -252,19 +256,28 @@
                 }
             }
 
-            generateOmophone(sboxIndex, x, y, index, key) {
-                const data = new TextEncoder().encode(`${sboxIndex}-${x}-${y}-${index}-${key}`);
-                let hash = 0;
+            async shuffleArray(array, key) {
+                // Криптостойкое перемешивание Фишера-Йейтса
+                const keyBytes = new TextEncoder().encode(JSON.stringify(key));
+                let seed = 0;
                 
-                for (let i = 0; i < data.length; i++) {
-                    hash = ((hash << 5) - hash) + data[i];
-                    hash |= 0;
+                for (let i = 0; i < keyBytes.length; i++) {
+                    seed = (seed << 8) | keyBytes[i];
                 }
                 
-                return Math.abs(hash) % 65536;
+                for (let i = array.length - 1; i > 0; i--) {
+                    // Генерируем псевдослучайный индекс
+                    seed = (seed * 1664525 + 1013904223) % 4294967296;
+                    const j = seed % (i + 1);
+                    
+                    // Меняем местами
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
             }
 
             encryptPair(byte1, byte2) {
+                if (!this.sBoxes) throw new Error('S-Box не инициализирован');
+                
                 // Разбираем первый байт на ниблы
                 const highNibble = (byte1 >> 4) & 0x0F; // Старший нибл (0-15)
                 const lowNibble = byte1 & 0x0F;         // Младший нибл (0-15)
@@ -273,6 +286,11 @@
                 const sboxIndex = highNibble;
                 const x = lowNibble;
                 const y = byte2;
+                
+                // Проверяем границы
+                if (sboxIndex < 0 || sboxIndex >= 16 || x < 0 || x >= 16 || y < 0 || y >= 256) {
+                    throw new Error(`Неверные координаты: sbox=${sboxIndex}, x=${x}, y=${y}`);
+                }
                 
                 // Шифруем
                 const omophones = this.sBoxes[sboxIndex][x][y];
@@ -291,6 +309,10 @@
             }
 
             decryptPair(omophone) {
+                if (!this.reverseMap.has(omophone)) {
+                    throw new Error(`Омофон 0x${omophone.toString(16).padStart(4, '0')} не найден`);
+                }
+                
                 const { sboxIndex, x, y } = this.reverseMap.get(omophone);
                 
                 // Восстанавливаем первый байт
@@ -350,7 +372,7 @@
 
                 for (let i = 0; i < bytes.length; i += 2) {
                     const byte1 = bytes[i];
-                    const byte2 = bytes[i + 1] || 0;
+                    const byte2 = (i + 1 < bytes.length) ? bytes[i + 1] : 0; // Padding 0 если нечетно
                     
                     const result = cipher.encryptPair(byte1, byte2);
                     
@@ -410,9 +432,16 @@
                     
                     const result = cipher.decryptPair(omophone);
                     decryptedBytes.push(result.byte1);
-                    if (result.byte2 !== 0) decryptedBytes.push(result.byte2);
+                    
+                    // Добавляем второй байт (даже если это padding)
+                    decryptedBytes.push(result.byte2);
                     
                     decHtml += `<div class="byte-pair">0x${hex.padStart(4, '0')} → [0x${result.byte1.toString(16).padStart(2, '0')}, 0x${result.byte2.toString(16).padStart(2, '0')}]</div>`;
+                }
+
+                // Убираем trailing zero если он был добавлен как padding
+                if (decryptedBytes.length > 0 && decryptedBytes[decryptedBytes.length - 1] === 0) {
+                    decryptedBytes.pop();
                 }
 
                 const decryptedText = new TextDecoder().decode(new Uint8Array(decryptedBytes));
