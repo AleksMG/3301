@@ -3,444 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Омофонический шифратор 16x16x16</title>
+    <title>Омонофонное шифрование</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Courier New', monospace; 
-            background: #1a1a1a; 
-            color: #00ff00; 
-            padding: 20px; 
-            line-height: 1.6;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            background: #2a2a2a; 
-            padding: 20px; 
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-        }
-        h1, h2, h3 { 
-            color: #00ff00; 
-            margin-bottom: 20px; 
-            text-align: center;
-        }
-        .panel {
-            background: #333;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #00ff00;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #00ff00;
-        }
-        input, textarea, button, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #00ff00;
-            background: #000;
-            color: #00ff00;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        button {
-            background: #00ff00;
-            color: #000;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 5px 0;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background: #00cc00;
-        }
-        .result-area {
-            margin-top: 20px;
-            padding: 20px;
-            background: #333;
-            border-radius: 8px;
-            border: 2px solid #00ff00;
-        }
-        .hex-view {
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            background: #000;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            border: 1px solid #444;
-        }
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-weight: bold;
-            text-align: center;
-        }
-        .success { background: #004400; color: #00ff00; }
-        .error { background: #440000; color: #ff0000; }
-        .warning { background: #443300; color: #ffcc00; }
         
-        .visualization {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .vis-box {
-            background: #000;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #00ff00;
-        }
-        .byte-pair {
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-            padding: 5px;
-            background: #222;
-            border-radius: 3px;
-            font-size: 12px;
+            flex-direction: column;
+            align-items: center;
         }
-        .process-step {
-            margin: 10px 0;
-            padding: 10px;
-            background: #222;
-            border-radius: 5px;
-            border-left: 3px solid #00ff00;
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .description {
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #e0f7fa;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+            text-align: center;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #0288d1, #4fc3f7);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            min-height: 50px;
+            word-break: break-all;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            color: #e0f7fa;
+            font-style: italic;
+        }
+        
+        .technical {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .technical h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .technical-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .tech-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1;
+            min-width: 250px;
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+        
+        .tech-box h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #e0f7fa;
+            font-size: 0.9rem;
         }
         
         @media (max-width: 768px) {
-            .visualization {
-                grid-template-columns: 1fr;
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .panel {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Омонофонное Шифрование</h1>
+        <p class="description">Профессиональная реализация омонофонного шифрования с использованием S-box 256x256, где каждый байт имеет 256 уникальных омофонов</p>
+    </header>
+    
     <div class="container">
-        <h1>🔐 Омофонический шифратор 16x16x16</h1>
+        <div class="panel">
+            <h2>Исходный текст</h2>
+            <textarea id="inputText" placeholder="Введите текст для шифрования...">Привет, мир! Это демонстрация омонофонного шифрования.</textarea>
+            <div class="buttons">
+                <button id="encryptBtn">Зашифровать</button>
+                <button id="decryptBtn">Расшифровать</button>
+                <button id="clearBtn">Очистить</button>
+            </div>
+            <div class="status" id="status"></div>
+        </div>
         
         <div class="panel">
-            <h2>⚙️ Настройки ключа</h2>
-            <div class="input-group">
-                <label for="passphrase">Ключевая фраза:</label>
-                <input type="text" id="passphrase" value="секретный-ключ-123" placeholder="Введите ключевую фразу">
-            </div>
-            <div class="input-group">
-                <label for="salt">Соль (HEX):</label>
-                <input type="text" id="salt" value="a1b2c3d4e5f67890" placeholder="a1b2c3d4...">
-            </div>
-            <button onclick="initializeBox()">🔄 Инициализировать боксы</button>
-        </div>
-
-        <div class="panel">
-            <h2>📝 Ввод текста</h2>
-            <div class="input-group">
-                <label for="inputText">Исходный текст:</label>
-                <textarea id="inputText" placeholder="Введите текст для шифрования...">Hello World! Привет мир!</textarea>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button onclick="encryptText()" style="background: #ff9900;">🔒 Зашифровать</button>
-                <button onclick="decryptText()" style="background: #0099ff;">🔓 Расшифровать</button>
-            </div>
-        </div>
-
-        <div id="status" class="status warning">Статус: Боксы не инициализированы</div>
-
-        <div class="result-area">
-            <h2>👁️ Визуализация процесса</h2>
-            
-            <div class="process-step" id="preparationStep">
-                <h3>📋 Подготовка байтов</h3>
-                <div id="preparationVis">Ожидание данных...</div>
-            </div>
-
-            <div class="visualization">
-                <div class="vis-box">
-                    <h3>🔢 Выбор S-Box</h3>
-                    <div id="sboxSelectionVis">Ожидание данных...</div>
-                </div>
-                <div class="vis-box">
-                    <h3>🔢 Координаты в S-Box</h3>
-                    <div id="coordinatesVis">Ожидание данных...</div>
-                </div>
-            </div>
-
-            <div class="process-step" id="encryptionStep">
-                <h3>🔐 Процесс шифрования</h3>
-                <div id="encryptionVis">Ожидание данных...</div>
-            </div>
-
-            <div class="process-step" id="resultStep">
-                <h3>📊 Результат</h3>
-                <div class="input-group">
-                    <label for="encryptedText">Зашифрованный текст (HEX):</label>
-                    <textarea id="encryptedText" placeholder="Здесь появится зашифрованный текст в HEX..."></textarea>
-                </div>
-                <div class="hex-view" id="hexView">Ожидание данных...</div>
-            </div>
-            
-            <h3>📋 История операций</h3>
-            <div class="hex-view" id="history">Ожидание операций...</div>
+            <h2>Результат</h2>
+            <div class="result" id="outputResult">Здесь появится результат...</div>
+            <h2 style="margin-top: 30px;">S-box информация</h2>
+            <div class="result" id="sboxInfo">S-box не инициализирован</div>
         </div>
     </div>
+    
+    <div class="technical">
+        <h2>Техническая информация</h2>
+        <div class="technical-content">
+            <div class="tech-box">
+                <h3>Принцип работы</h3>
+                <p>Каждый байт исходного текста заменяется на один из 256 возможных омофонов, выбранных случайным образом из S-box 256x256.</p>
+            </div>
+            <div class="tech-box">
+                <h3>Криптостойкость</h3>
+                <p>Шифрование устойчиво к частотному анализу, так как каждый символ имеет множество вариантов представления в шифротексте.</p>
+            </div>
+            <div class="tech-box">
+                <h3>S-box</h3>
+                <p>Таблица 256x256, содержащая 65536 уникальных значений. Каждая строка соответствует одному байту и содержит 256 его омофонов.</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Омонофонное шифрование | Реализация с использованием HTML, CSS и JavaScript</p>
+    </footer>
 
     <script>
-        class OmoCipher {
+        class OmonophoneCipher {
             constructor() {
-                this.sBoxes = new Array(16); // 16 S-Box'ов
-                this.reverseMap = new Map(); // омофон → {sboxIndex, x, y}
-                this.isInitialized = false;
+                this.sbox = null;
+                this.inverseSbox = null;
+                this.initializeSbox();
             }
-
-            async initialize(passphrase, saltHex) {
-                const salt = this.hexToBytes(saltHex);
-                const keyMaterial = await crypto.subtle.importKey(
-                    'raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveBits']
-                );
+            
+            // Инициализация S-box 256x256
+            initializeSbox() {
+                // Создаем массив из всех возможных 16-битных значений (0-65535)
+                const allValues = Array.from({length: 65536}, (_, i) => i);
                 
-                const derivedKey = await crypto.subtle.deriveBits(
-                    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-                    keyMaterial, 256
-                );
-
-                await this.createSBoxes(new Uint8Array(derivedKey));
-                this.isInitialized = true;
-            }
-
-            async createSBoxes(key) {
-                // Создаем 16 S-Box'ов размером 16x256
-                for (let sboxIndex = 0; sboxIndex < 16; sboxIndex++) {
-                    this.sBoxes[sboxIndex] = new Array(16);
-                    
-                    for (let x = 0; x < 16; x++) {
-                        this.sBoxes[sboxIndex][x] = new Array(256);
-                        
-                        for (let y = 0; y < 256; y++) {
-                            // Генерируем 4 омофона для каждой ячейки
-                            const omophones = [
-                                this.generateOmophone(sboxIndex, x, y, 0, key),
-                                this.generateOmophone(sboxIndex, x, y, 1, key),
-                                this.generateOmophone(sboxIndex, x, y, 2, key),
-                                this.generateOmophone(sboxIndex, x, y, 3, key)
-                            ];
-                            
-                            this.sBoxes[sboxIndex][x][y] = omophones;
-                            
-                            // Заполняем обратную карту
-                            omophones.forEach(omophone => {
-                                this.reverseMap.set(omophone, { sboxIndex, x, y });
-                            });
-                        }
+                // Перемешиваем значения (Фишер-Йейтс)
+                for (let i = allValues.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allValues[i], allValues[j]] = [allValues[j], allValues[i]];
+                }
+                
+                // Создаем S-box 256x256
+                this.sbox = new Array(256);
+                this.inverseSbox = new Array(65536);
+                
+                let index = 0;
+                for (let i = 0; i < 256; i++) {
+                    this.sbox[i] = new Array(256);
+                    for (let j = 0; j < 256; j++) {
+                        const value = allValues[index++];
+                        this.sbox[i][j] = value;
+                        this.inverseSbox[value] = i; // Сохраняем обратное соответствие
                     }
                 }
-            }
-
-            generateOmophone(sboxIndex, x, y, index, key) {
-                const data = new TextEncoder().encode(`${sboxIndex}-${x}-${y}-${index}-${key}`);
-                let hash = 0;
                 
-                for (let i = 0; i < data.length; i++) {
-                    hash = ((hash << 5) - hash) + data[i];
-                    hash |= 0;
+                // Обновляем информацию о S-box
+                this.updateSboxInfo();
+            }
+            
+            updateSboxInfo() {
+                const infoElement = document.getElementById('sboxInfo');
+                if (this.sbox) {
+                    // Проверяем уникальность всех значений
+                    const valueSet = new Set();
+                    let allUnique = true;
+                    
+                    for (let i = 0; i < 256; i++) {
+                        for (let j = 0; j < 256; j++) {
+                            const value = this.sbox[i][j];
+                            if (valueSet.has(value)) {
+                                allUnique = false;
+                                break;
+                            }
+                            valueSet.add(value);
+                        }
+                        if (!allUnique) break;
+                    }
+                    
+                    infoElement.innerHTML = `S-box инициализирован: 256x256 (65536 значений)<br>
+                    Все значения уникальные: ${allUnique ? 'Да' : 'Нет'}<br>
+                    Пример: байт 65 (символ 'A') имеет омофоны: ${this.sbox[65][0]}, ${this.sbox[65][1]}, ..., ${this.sbox[65][255]}`;
+                } else {
+                    infoElement.textContent = 'S-box не инициализирован';
+                }
+            }
+            
+            // Шифрование текста
+            encrypt(text) {
+                if (!this.sbox) {
+                    throw new Error('S-box не инициализирован');
                 }
                 
-                return Math.abs(hash) % 65536;
-            }
-
-            encryptPair(byte1, byte2) {
-                // Разбираем первый байт на ниблы
-                const highNibble = (byte1 >> 4) & 0x0F; // Старший нибл (0-15)
-                const lowNibble = byte1 & 0x0F;         // Младший нибл (0-15)
-                
-                // Выбираем S-Box based on high nibble
-                const sboxIndex = highNibble;
-                const x = lowNibble;
-                const y = byte2;
-                
-                // Шифруем
-                const omophones = this.sBoxes[sboxIndex][x][y];
-                const randomIndex = Math.floor(Math.random() * omophones.length);
-                const omophone = omophones[randomIndex];
-                
-                return {
-                    omophone,
-                    sboxIndex,
-                    x,
-                    y,
-                    highNibble,
-                    lowNibble,
-                    index: randomIndex
-                };
-            }
-
-            decryptPair(omophone) {
-                const { sboxIndex, x, y } = this.reverseMap.get(omophone);
-                
-                // Восстанавливаем первый байт
-                const byte1 = (sboxIndex << 4) | x;
-                // Второй байт остается без изменений
-                const byte2 = y;
-                
-                return { byte1, byte2, sboxIndex, x, y };
-            }
-
-            hexToBytes(hex) {
-                const bytes = new Uint8Array(hex.length / 2);
-                for (let i = 0; i < hex.length; i += 2) {
-                    bytes[i/2] = parseInt(hex.substr(i, 2), 16);
+                const encrypted = [];
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i);
+                    if (charCode > 255) {
+                        throw new Error('Текст должен содержать только символы ASCII (0-255)');
+                    }
+                    
+                    // Случайно выбираем омофон для данного байта
+                    const randomIndex = Math.floor(Math.random() * 256);
+                    const encryptedValue = this.sbox[charCode][randomIndex];
+                    
+                    // Преобразуем число в шестнадцатеричную строку и добавляем
+                    encrypted.push(encryptedValue.toString(16).padStart(4, '0'));
                 }
-                return bytes;
+                
+                return encrypted.join('');
+            }
+            
+            // Расшифрование текста
+            decrypt(hexString) {
+                if (!this.inverseSbox) {
+                    throw new Error('Обратный S-box не инициализирован');
+                }
+                
+                // Проверяем, что длина шестнадцатеричной строки кратна 4
+                if (hexString.length % 4 !== 0) {
+                    throw new Error('Неверный формат шифротекста');
+                }
+                
+                const decrypted = [];
+                for (let i = 0; i < hexString.length; i += 4) {
+                    const hexValue = hexString.substr(i, 4);
+                    const encryptedValue = parseInt(hexValue, 16);
+                    
+                    if (isNaN(encryptedValue) || encryptedValue < 0 || encryptedValue > 65535) {
+                        throw new Error('Неверное значение в шифротексте');
+                    }
+                    
+                    // Используем обратный S-box для получения исходного байта
+                    const originalByte = this.inverseSbox[encryptedValue];
+                    decrypted.push(String.fromCharCode(originalByte));
+                }
+                
+                return decrypted.join('');
             }
         }
-
-        const cipher = new OmoCipher();
-        let operationHistory = [];
-
-        async function initializeBox() {
-            const passphrase = document.getElementById('passphrase').value;
-            const salt = document.getElementById('salt').value;
+        
+        // Инициализация шифра
+        const cipher = new OmonophoneCipher();
+        
+        // Обработчики событий для кнопок
+        document.getElementById('encryptBtn').addEventListener('click', () => {
+            const inputText = document.getElementById('inputText').value;
+            const statusElement = document.getElementById('status');
             
             try {
-                updateStatus('Инициализация 16 S-Box\'ов...', 'warning');
-                await cipher.initialize(passphrase, salt);
-                updateStatus('16 S-Box\'ов успешно инициализированы!', 'success');
-                addToHistory('Система инициализирована с новым ключом (16 S-Box\'ов)');
+                const encrypted = cipher.encrypt(inputText);
+                document.getElementById('outputResult').textContent = encrypted;
+                statusElement.textContent = `Текст зашифрован. Длина: ${encrypted.length} символов`;
+                statusElement.style.color = '#a5d6a7';
             } catch (error) {
-                updateStatus('Ошибка инициализации: ' + error.message, 'error');
+                document.getElementById('outputResult').textContent = 'Ошибка: ' + error.message;
+                statusElement.textContent = 'Ошибка при шифровании';
+                statusElement.style.color = '#ef9a9a';
             }
-        }
-
-        function encryptText() {
-            if (!cipher.isInitialized) {
-                updateStatus('Сначала инициализируйте боксы!', 'error');
-                return;
-            }
-
-            const text = document.getElementById('inputText').value;
+        });
+        
+        document.getElementById('decryptBtn').addEventListener('click', () => {
+            const inputText = document.getElementById('inputText').value;
+            const statusElement = document.getElementById('status');
             
-            if (!text) {
-                updateStatus('Введите текст для шифрования', 'error');
-                return;
-            }
-
             try {
-                const bytes = new TextEncoder().encode(text);
-                let encryptedHex = '';
-                let prepHtml = '';
-                let sboxHtml = '';
-                let coordHtml = '';
-                let encHtml = '';
-
-                for (let i = 0; i < bytes.length; i += 2) {
-                    const byte1 = bytes[i];
-                    const byte2 = bytes[i + 1] || 0;
-                    
-                    const result = cipher.encryptPair(byte1, byte2);
-                    
-                    // Визуализация подготовки
-                    prepHtml += `<div>Байты ${i}-${i+1}: [0x${byte1.toString(16).padStart(2, '0')}, 0x${byte2.toString(16).padStart(2, '0')}]</div>`;
-                    prepHtml += `<div>→ Ниблы: [0x${result.highNibble.toString(16)}][0x${result.lowNibble.toString(16)}]</div>`;
-                    
-                    // Визуализация выбора S-Box
-                    sboxHtml += `<div class="byte-pair">S-Box[${result.sboxIndex}] для нибла 0x${result.highNibble.toString(16)}</div>`;
-                    
-                    // Визуализация координат
-                    coordHtml += `<div class="byte-pair">Координаты: X=0x${result.x.toString(16)}, Y=0x${result.y.toString(16).padStart(2, '0')}</div>`;
-                    
-                    // Визуализация шифрования
-                    encHtml += `<div class="byte-pair">[0x${byte1.toString(16).padStart(2, '0')}, 0x${byte2.toString(16).padStart(2, '0')}] → 0x${result.omophone.toString(16).padStart(4, '0')}</div>`;
-                    
-                    encryptedHex += result.omophone.toString(16).padStart(4, '0') + ' ';
-                }
-
-                document.getElementById('preparationVis').innerHTML = prepHtml;
-                document.getElementById('sboxSelectionVis').innerHTML = sboxHtml;
-                document.getElementById('coordinatesVis').innerHTML = coordHtml;
-                document.getElementById('encryptionVis').innerHTML = encHtml;
-                
-                document.getElementById('encryptedText').value = encryptedHex.trim();
-                document.getElementById('hexView').textContent = `HEX: ${encryptedHex.trim()}`;
-                
-                addToHistory(`Зашифровано: "${text}" -> ${encryptedHex.trim()}`);
-                updateStatus('Текст успешно зашифрован!', 'success');
-
+                const decrypted = cipher.decrypt(inputText);
+                document.getElementById('outputResult').textContent = decrypted;
+                statusElement.textContent = `Текст расшифрован. Длина: ${decrypted.length} символов`;
+                statusElement.style.color = '#a5d6a7';
             } catch (error) {
-                updateStatus('Ошибка шифрования: ' + error.message, 'error');
+                document.getElementById('outputResult').textContent = 'Ошибка: ' + error.message;
+                statusElement.textContent = 'Ошибка при расшифровании';
+                statusElement.style.color = '#ef9a9a';
             }
-        }
-
-        function decryptText() {
-            if (!cipher.isInitialized) {
-                updateStatus('Сначала инициализируйте боксы!', 'error');
-                return;
-            }
-
-            const hexText = document.getElementById('encryptedText').value;
-            
-            if (!hexText) {
-                updateStatus('Введите HEX для расшифрования', 'error');
-                return;
-            }
-
-            try {
-                const hexValues = hexText.trim().split(/\s+/);
-                let decryptedBytes = [];
-                let decHtml = '';
-
-                for (const hex of hexValues) {
-                    const omophone = parseInt(hex, 16);
-                    if (isNaN(omophone)) throw new Error('Неверный HEX формат');
-                    
-                    const result = cipher.decryptPair(omophone);
-                    decryptedBytes.push(result.byte1);
-                    if (result.byte2 !== 0) decryptedBytes.push(result.byte2);
-                    
-                    decHtml += `<div class="byte-pair">0x${hex.padStart(4, '0')} → [0x${result.byte1.toString(16).padStart(2, '0')}, 0x${result.byte2.toString(16).padStart(2, '0')}]</div>`;
-                }
-
-                const decryptedText = new TextDecoder().decode(new Uint8Array(decryptedBytes));
-                document.getElementById('inputText').value = decryptedText;
-                document.getElementById('encryptionVis').innerHTML = decHtml;
-                
-                addToHistory(`Расшифровано: ${hexText} -> "${decryptedText}"`);
-                updateStatus('Текст успешно расшифрован!', 'success');
-
-            } catch (error) {
-                updateStatus('Ошибка расшифрования: ' + error.message, 'error');
-            }
-        }
-
-        function updateStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
-        }
-
-        function addToHistory(message) {
-            operationHistory.push(`${new Date().toLocaleTimeString()}: ${message}`);
-            if (operationHistory.length > 10) operationHistory.shift();
-            document.getElementById('history').textContent = operationHistory.join('\n');
-        }
-
-        window.addEventListener('load', () => {
-            setTimeout(initializeBox, 1000);
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputResult').textContent = 'Здесь появится результат...';
+            document.getElementById('status').textContent = '';
         });
     </script>
 </body>
