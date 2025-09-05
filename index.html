@@ -307,10 +307,10 @@
                 const upperBytes = [];
                 const lowerBytes = [];
                 
-                // Разделяем на верхние и нижние байты
+                // РЕШЕНИЕ ПРОБЛЕМЫ: Добавляем смещение +128 к верхним байтам
                 for (let i = 0; i < bytes.length; i++) {
                     if (i % 2 === 0) {
-                        upperBytes.push(bytes[i]);
+                        upperBytes.push(bytes[i] + 128); // ДОБАВЛЯЕМ 128
                     } else {
                         lowerBytes.push(bytes[i]);
                     }
@@ -329,9 +329,10 @@
                 const bytes = new Uint8Array(originalLength);
                 const paddingByte = new TextEncoder().encode(paddingChar)[0];
                 
+                // РЕШЕНИЕ ПРОБЛЕМЫ: Вычитаем 128 из верхних байтов при восстановлении
                 for (let i = 0; i < originalLength; i++) {
                     if (i % 2 === 0) {
-                        bytes[i] = upperBytes[Math.floor(i / 2)];
+                        bytes[i] = upperBytes[Math.floor(i / 2)] - 128; // ВЫЧИТАЕМ 128
                     } else {
                         bytes[i] = lowerBytes[Math.floor(i / 2)];
                     }
@@ -391,7 +392,7 @@
                 // Визуализация подготовки
                 let prepHtml = `
                     <div>Исходная длина: ${preparation.originalLength} байт</div>
-                    <div>Верхних байтов: ${preparation.upperBytes.length}</div>
+                    <div>Верхних байтов: ${preparation.upperBytes.length} (со смещением +128)</div>
                     <div>Нижних байтов: ${preparation.lowerBytes.length}</div>
                 `;
                 
@@ -406,9 +407,10 @@
                 let lowerHtml = '';
                 
                 preparation.upperBytes.forEach((byte, index) => {
+                    const originalByte = byte - 128; // Показываем оригинальное значение
                     upperHtml += `<div class="byte-pair">
                         <span>Байт ${index}:</span>
-                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                        <span>${originalByte} → ${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
                     </div>`;
                 });
                 
@@ -501,9 +503,10 @@
                 let lowerHtml = '';
                 
                 upperBytes.forEach((byte, index) => {
+                    const originalByte = byte - 128; // Показываем оригинальное значение
                     upperHtml += `<div class="byte-pair">
                         <span>Байт ${index}:</span>
-                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                        <span>${byte} → ${originalByte} (0x${byte.toString(16).padStart(2, '0')})</span>
                     </div>`;
                 });
                 
