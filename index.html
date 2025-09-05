@@ -220,16 +220,16 @@
                     keyMaterial, 256
                 );
 
-                await this.createSBoxes(new Uint8Array(derivedKey));
+                this.createSBoxes(new Uint8Array(derivedKey));
                 this.isInitialized = true;
             }
 
-            async createSBoxes(key) {
+            createSBoxes(key) {
                 // 1. Генерируем все 65536 омофонов (0x0000 - 0xFFFF)
                 const allOmophones = Array.from({length: 65536}, (_, i) => i);
                 
-                // 2. Перемешиваем массив с использованием ключа
-                await this.shuffleArray(allOmophones, key);
+                // 2. Перемешиваем массив СИНХРОННО
+                this.shuffleArray(allOmophones, key);
                 
                 // 3. Распределяем по S-Box'ам
                 let omophoneIndex = 0;
@@ -256,21 +256,18 @@
                 }
             }
 
-            async shuffleArray(array, key) {
-                // Криптостойкое перемешивание Фишера-Йейтса
-                const keyBytes = new TextEncoder().encode(JSON.stringify(key));
+            shuffleArray(array, key) {
+                // Используем ключ для инициализации перемешивания
                 let seed = 0;
-                
-                for (let i = 0; i < keyBytes.length; i++) {
-                    seed = (seed << 8) | keyBytes[i];
+                for (let i = 0; i < key.length; i++) {
+                    seed = (seed << 8) | key[i];
                 }
                 
                 for (let i = array.length - 1; i > 0; i--) {
-                    // Генерируем псевдослучайный индекс
+                    // Простой но эффективный PRNG
                     seed = (seed * 1664525 + 1013904223) % 4294967296;
                     const j = seed % (i + 1);
                     
-                    // Меняем местами
                     [array[i], array[j]] = [array[j], array[i]];
                 }
             }
