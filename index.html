@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Омофонический шифратор 16x16x16</title>
+    <title>Омофонический шифратор с разделением байтов</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -134,7 +134,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Омофонический шифратор 16x16x16</h1>
+        <h1>🔐 Омофонический шифратор с разделением байтов</h1>
         
         <div class="panel">
             <h2>⚙️ Настройки ключа</h2>
@@ -146,7 +146,7 @@
                 <label for="salt">Соль (HEX):</label>
                 <input type="text" id="salt" value="a1b2c3d4e5f67890" placeholder="a1b2c3d4...">
             </div>
-            <button onclick="initializeBox()">🔄 Инициализировать боксы</button>
+            <button onclick="initializeBox()">🔄 Инициализировать бокс</button>
         </div>
 
         <div class="panel">
@@ -155,30 +155,34 @@
                 <label for="inputText">Исходный текст:</label>
                 <textarea id="inputText" placeholder="Введите текст для шифрования...">Hello World! Привет мир!</textarea>
             </div>
+            <div class="input-group">
+                <label for="paddingChar">Символ дополнения:</label>
+                <input type="text" id="paddingChar" value="·" maxlength="1" placeholder="Символ для дополнения">
+            </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <button onclick="encryptText()" style="background: #ff9900;">🔒 Зашифровать</button>
                 <button onclick="decryptText()" style="background: #0099ff;">🔓 Расшифровать</button>
             </div>
         </div>
 
-        <div id="status" class="status warning">Статус: Боксы не инициализированы</div>
+        <div id="status" class="status warning">Статус: Бокс не инициализирован</div>
 
         <div class="result-area">
             <h2>👁️ Визуализация процесса</h2>
             
             <div class="process-step" id="preparationStep">
-                <h3>📋 Подготовка байтов</h3>
+                <h3>📋 Подготовка текста</h3>
                 <div id="preparationVis">Ожидание данных...</div>
             </div>
 
             <div class="visualization">
                 <div class="vis-box">
-                    <h3>🔢 Выбор S-Box</h3>
-                    <div id="sboxSelectionVis">Ожидание данных...</div>
+                    <h3>🔢 Верхние байты (128-255)</h3>
+                    <div id="upperBytesVis">Ожидание данных...</div>
                 </div>
                 <div class="vis-box">
-                    <h3>🔢 Координаты в S-Box</h3>
-                    <div id="coordinatesVis">Ожидание данных...</div>
+                    <h3>🔢 Нижние байты (0-127)</h3>
+                    <div id="lowerBytesVis">Ожидание данных...</div>
                 </div>
             </div>
 
@@ -204,8 +208,8 @@
     <script>
         class OmoCipher {
             constructor() {
-                this.sBoxes = new Array(16); // 16 S-Box'ов
-                this.reverseMap = new Map(); // омофон → {sboxIndex, x, y}
+                this.box = null;
+                this.reverseMap = null;
                 this.isInitialized = false;
             }
 
@@ -220,104 +224,70 @@
                     keyMaterial, 256
                 );
 
-                this.createSBoxes(new Uint8Array(derivedKey));
+                await this.createBox(new Uint8Array(derivedKey));
                 this.isInitialized = true;
             }
 
-            createSBoxes(key) {
-                // 1. Генерируем все 65536 омофонов (0x0000 - 0xFFFF)
-                const allOmophones = Array.from({length: 65536}, (_, i) => i);
+            async createBox(key) {
+                this.box = new Array(256);
+                this.reverseMap = new Map();
                 
-                // 2. Перемешиваем массив СИНХРОННО
-                this.shuffleArray(allOmophones, key);
-                
-                // 3. Распределяем по S-Box'ам
-                let omophoneIndex = 0;
-                
-                for (let sboxIndex = 0; sboxIndex < 16; sboxIndex++) {
-                    this.sBoxes[sboxIndex] = new Array(16);
-                    
-                    for (let x = 0; x < 16; x++) {
-                        this.sBoxes[sboxIndex][x] = new Array(256);
+                // Заполняем только нужный диапазон (128-255 для X, 0-127 для Y)
+                for (let x = 128; x < 256; x++) {
+                    this.box[x] = new Array(128);
+                    for (let y = 0; y < 128; y++) {
+                        // 4 омофона в каждой ячейке
+                        this.box[x][y] = [
+                            this.generateOmoфон(x, y, 0, key),
+                            this.generateOmoфон(x, y, 1, key),
+                            this.generateOmoфон(x, y, 2, key),
+                            this.generateOmoфон(x, y, 3, key)
+                        ];
                         
-                        for (let y = 0; y < 256; y++) {
-                            // Берем 4 следующих омофона из перемешанного массива
-                            const omophones = allOmophones.slice(omophoneIndex, omophoneIndex + 4);
-                            omophoneIndex += 4;
-                            
-                            this.sBoxes[sboxIndex][x][y] = omophones;
-                            
-                            // Заполняем обратную карту
-                            omophones.forEach(omophone => {
-                                this.reverseMap.set(omophone, { sboxIndex, x, y });
-                            });
-                        }
+                        // Заполняем обратную карту
+                        this.box[x][y].forEach(omoфон => {
+                            this.reverseMap.set(omoфон, { x, y });
+                        });
                     }
                 }
             }
 
-            shuffleArray(array, key) {
-                // Используем ключ для инициализации перемешивания
-                let seed = 0;
-                for (let i = 0; i < key.length; i++) {
-                    seed = (seed << 8) | key[i];
+            generateOmoфон(x, y, index, key) {
+                const data = new TextEncoder().encode(`${x}-${y}-${index}`);
+                let hash = 0;
+                
+                for (let i = 0; i < data.length; i++) {
+                    hash = ((hash << 5) - hash) + data[i];
+                    hash |= 0;
                 }
                 
-                for (let i = array.length - 1; i > 0; i--) {
-                    // Простой но эффективный PRNG
-                    seed = (seed * 1664525 + 1013904223) % 4294967296;
-                    const j = seed % (i + 1);
-                    
-                    [array[i], array[j]] = [array[j], array[i]];
+                for (let i = 0; i < key.length; i++) {
+                    hash = ((hash << 3) - hash) + key[i];
+                    hash |= 0;
                 }
+                
+                return Math.abs(hash) % 65536;
             }
 
-            encryptPair(byte1, byte2) {
-                if (!this.sBoxes) throw new Error('S-Box не инициализирован');
-                
-                // Разбираем первый байт на ниблы
-                const highNibble = (byte1 >> 4) & 0x0F; // Старший нибл (0-15)
-                const lowNibble = byte1 & 0x0F;         // Младший нибл (0-15)
-                
-                // Выбираем S-Box based on high nibble
-                const sboxIndex = highNibble;
-                const x = lowNibble;
-                const y = byte2;
-                
-                // Проверяем границы
-                if (sboxIndex < 0 || sboxIndex >= 16 || x < 0 || x >= 16 || y < 0 || y >= 256) {
-                    throw new Error(`Неверные координаты: sbox=${sboxIndex}, x=${x}, y=${y}`);
-                }
-                
-                // Шифруем
-                const omophones = this.sBoxes[sboxIndex][x][y];
-                const randomIndex = Math.floor(Math.random() * omophones.length);
-                const omophone = omophones[randomIndex];
-                
+            encrypt(x, y) {
+                if (!this.isValidCoord(x, y)) throw new Error('Неверные координаты');
+                const omophones = this.box[x][y];
+                const randomIndex = Math.floor(Math.random() * 4);
                 return {
-                    omophone,
-                    sboxIndex,
-                    x,
-                    y,
-                    highNibble,
-                    lowNibble,
-                    index: randomIndex
+                    value: omophones[randomIndex],
+                    index: randomIndex,
+                    x, y
                 };
             }
 
-            decryptPair(omophone) {
-                if (!this.reverseMap.has(omophone)) {
-                    throw new Error(`Омофон 0x${omophone.toString(16).padStart(4, '0')} не найден`);
-                }
-                
-                const { sboxIndex, x, y } = this.reverseMap.get(omophone);
-                
-                // Восстанавливаем первый байт
-                const byte1 = (sboxIndex << 4) | x;
-                // Второй байт остается без изменений
-                const byte2 = y;
-                
-                return { byte1, byte2, sboxIndex, x, y };
+            decrypt(omoфон) {
+                const coords = this.reverseMap.get(omoфон);
+                if (!coords) throw new Error('Омофон не найден');
+                return coords;
+            }
+
+            isValidCoord(x, y) {
+                return x >= 128 && x <= 255 && y >= 0 && y <= 127;
             }
 
             hexToBytes(hex) {
@@ -327,20 +297,71 @@
                 }
                 return bytes;
             }
+
+            bytesToHex(bytes) {
+                return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+            }
+
+            prepareText(text, paddingChar = '·') {
+                const bytes = new TextEncoder().encode(text);
+                const upperBytes = [];
+                const lowerBytes = [];
+                
+                // Разделяем на верхние и нижние байты
+                for (let i = 0; i < bytes.length; i++) {
+                    if (i % 2 === 0) {
+                        upperBytes.push(bytes[i]);
+                    } else {
+                        lowerBytes.push(bytes[i]);
+                    }
+                }
+                
+                // Добавляем padding если нужно
+                if (upperBytes.length > lowerBytes.length) {
+                    const paddingByte = new TextEncoder().encode(paddingChar)[0];
+                    lowerBytes.push(paddingByte);
+                }
+                
+                return { upperBytes, lowerBytes, originalLength: bytes.length };
+            }
+
+            reconstructText(upperBytes, lowerBytes, originalLength, paddingChar = '·') {
+                const bytes = new Uint8Array(originalLength);
+                const paddingByte = new TextEncoder().encode(paddingChar)[0];
+                
+                for (let i = 0; i < originalLength; i++) {
+                    if (i % 2 === 0) {
+                        bytes[i] = upperBytes[Math.floor(i / 2)];
+                    } else {
+                        bytes[i] = lowerBytes[Math.floor(i / 2)];
+                    }
+                }
+                
+                // Убираем padding
+                let text = new TextDecoder().decode(bytes);
+                if (text.endsWith(paddingChar)) {
+                    text = text.slice(0, -1);
+                }
+                
+                return text;
+            }
         }
 
         const cipher = new OmoCipher();
         let operationHistory = [];
+        let currentUpperBytes = [];
+        let currentLowerBytes = [];
+        let currentOriginalLength = 0;
 
         async function initializeBox() {
             const passphrase = document.getElementById('passphrase').value;
             const salt = document.getElementById('salt').value;
             
             try {
-                updateStatus('Инициализация 16 S-Box\'ов...', 'warning');
+                updateStatus('Инициализация бокса...', 'warning');
                 await cipher.initialize(passphrase, salt);
-                updateStatus('16 S-Box\'ов успешно инициализированы!', 'success');
-                addToHistory('Система инициализирована с новым ключом (16 S-Box\'ов)');
+                updateStatus('Бокс успешно инициализирован!', 'success');
+                addToHistory('Система инициализирована с новым ключом');
             } catch (error) {
                 updateStatus('Ошибка инициализации: ' + error.message, 'error');
             }
@@ -348,11 +369,12 @@
 
         function encryptText() {
             if (!cipher.isInitialized) {
-                updateStatus('Сначала инициализируйте боксы!', 'error');
+                updateStatus('Сначала инициализируйте бокс!', 'error');
                 return;
             }
 
             const text = document.getElementById('inputText').value;
+            const paddingChar = document.getElementById('paddingChar').value || '·';
             
             if (!text) {
                 updateStatus('Введите текст для шифрования', 'error');
@@ -360,44 +382,72 @@
             }
 
             try {
-                const bytes = new TextEncoder().encode(text);
-                let encryptedHex = '';
-                let prepHtml = '';
-                let sboxHtml = '';
-                let coordHtml = '';
-                let encHtml = '';
+                // 1. Подготовка текста
+                const preparation = cipher.prepareText(text, paddingChar);
+                currentUpperBytes = preparation.upperBytes;
+                currentLowerBytes = preparation.lowerBytes;
+                currentOriginalLength = preparation.originalLength;
 
-                for (let i = 0; i < bytes.length; i += 2) {
-                    const byte1 = bytes[i];
-                    const byte2 = (i + 1 < bytes.length) ? bytes[i + 1] : 0; // Padding 0 если нечетно
-                    
-                    const result = cipher.encryptPair(byte1, byte2);
-                    
-                    // Визуализация подготовки
-                    prepHtml += `<div>Байты ${i}-${i+1}: [0x${byte1.toString(16).padStart(2, '0')}, 0x${byte2.toString(16).padStart(2, '0')}]</div>`;
-                    prepHtml += `<div>→ Ниблы: [0x${result.highNibble.toString(16)}][0x${result.lowNibble.toString(16)}]</div>`;
-                    
-                    // Визуализация выбора S-Box
-                    sboxHtml += `<div class="byte-pair">S-Box[${result.sboxIndex}] для нибла 0x${result.highNibble.toString(16)}</div>`;
-                    
-                    // Визуализация координат
-                    coordHtml += `<div class="byte-pair">Координаты: X=0x${result.x.toString(16)}, Y=0x${result.y.toString(16).padStart(2, '0')}</div>`;
-                    
-                    // Визуализация шифрования
-                    encHtml += `<div class="byte-pair">[0x${byte1.toString(16).padStart(2, '0')}, 0x${byte2.toString(16).padStart(2, '0')}] → 0x${result.omophone.toString(16).padStart(4, '0')}</div>`;
-                    
-                    encryptedHex += result.omophone.toString(16).padStart(4, '0') + ' ';
+                // Визуализация подготовки
+                let prepHtml = `
+                    <div>Исходная длина: ${preparation.originalLength} байт</div>
+                    <div>Верхних байтов: ${preparation.upperBytes.length}</div>
+                    <div>Нижних байтов: ${preparation.lowerBytes.length}</div>
+                `;
+                
+                if (preparation.upperBytes.length !== preparation.lowerBytes.length) {
+                    prepHtml += `<div>Добавлен padding: "${paddingChar}"</div>`;
                 }
-
+                
                 document.getElementById('preparationVis').innerHTML = prepHtml;
-                document.getElementById('sboxSelectionVis').innerHTML = sboxHtml;
-                document.getElementById('coordinatesVis').innerHTML = coordHtml;
+
+                // 2. Визуализация байтов
+                let upperHtml = '';
+                let lowerHtml = '';
+                
+                preparation.upperBytes.forEach((byte, index) => {
+                    upperHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                preparation.lowerBytes.forEach((byte, index) => {
+                    lowerHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                document.getElementById('upperBytesVis').innerHTML = upperHtml;
+                document.getElementById('lowerBytesVis').innerHTML = lowerHtml;
+
+                // 3. Шифрование
+                const encrypted = [];
+                let encHtml = '';
+                
+                for (let i = 0; i < preparation.upperBytes.length; i++) {
+                    const upperByte = preparation.upperBytes[i];
+                    const lowerByte = preparation.lowerBytes[i];
+                    
+                    const result = cipher.encrypt(upperByte, lowerByte);
+                    encrypted.push(result.value);
+                    
+                    encHtml += `<div class="byte-pair">
+                        <span>(${upperByte},${lowerByte})</span>
+                        <span>→</span>
+                        <span>0x${result.value.toString(16).padStart(4, '0')}</span>
+                    </div>`;
+                }
+                
                 document.getElementById('encryptionVis').innerHTML = encHtml;
                 
-                document.getElementById('encryptedText').value = encryptedHex.trim();
-                document.getElementById('hexView').textContent = `HEX: ${encryptedHex.trim()}`;
+                // 4. Результат
+                const hexOutput = encrypted.map(val => val.toString(16).padStart(4, '0')).join(' ');
+                document.getElementById('encryptedText').value = hexOutput;
+                document.getElementById('hexView').textContent = `HEX: ${hexOutput}`;
                 
-                addToHistory(`Зашифровано: "${text}" -> ${encryptedHex.trim()}`);
+                addToHistory(`Зашифровано: "${text}" -> ${hexOutput}`);
                 updateStatus('Текст успешно зашифрован!', 'success');
 
             } catch (error) {
@@ -407,11 +457,12 @@
 
         function decryptText() {
             if (!cipher.isInitialized) {
-                updateStatus('Сначала инициализируйте боксы!', 'error');
+                updateStatus('Сначала инициализируйте бокс!', 'error');
                 return;
             }
 
             const hexText = document.getElementById('encryptedText').value;
+            const paddingChar = document.getElementById('paddingChar').value || '·';
             
             if (!hexText) {
                 updateStatus('Введите HEX для расшифрования', 'error');
@@ -420,30 +471,51 @@
 
             try {
                 const hexValues = hexText.trim().split(/\s+/);
-                let decryptedBytes = [];
+                const upperBytes = [];
+                const lowerBytes = [];
                 let decHtml = '';
 
-                for (const hex of hexValues) {
-                    const omophone = parseInt(hex, 16);
-                    if (isNaN(omophone)) throw new Error('Неверный HEX формат');
+                hexValues.forEach(hex => {
+                    const value = parseInt(hex, 16);
+                    if (isNaN(value)) throw new Error('Неверный HEX формат');
                     
-                    const result = cipher.decryptPair(omophone);
-                    decryptedBytes.push(result.byte1);
+                    const coord = cipher.decrypt(value);
+                    upperBytes.push(coord.x);
+                    lowerBytes.push(coord.y);
                     
-                    // Добавляем второй байт (даже если это padding)
-                    decryptedBytes.push(result.byte2);
-                    
-                    decHtml += `<div class="byte-pair">0x${hex.padStart(4, '0')} → [0x${result.byte1.toString(16).padStart(2, '0')}, 0x${result.byte2.toString(16).padStart(2, '0')}]</div>`;
-                }
+                    decHtml += `<div class="byte-pair">
+                        <span>0x${hex.padStart(4, '0')}</span>
+                        <span>→</span>
+                        <span>(${coord.x},${coord.y})</span>
+                    </div>`;
+                });
 
-                // Убираем trailing zero если он был добавлен как padding
-                if (decryptedBytes.length > 0 && decryptedBytes[decryptedBytes.length - 1] === 0) {
-                    decryptedBytes.pop();
-                }
-
-                const decryptedText = new TextDecoder().decode(new Uint8Array(decryptedBytes));
-                document.getElementById('inputText').value = decryptedText;
                 document.getElementById('encryptionVis').innerHTML = decHtml;
+
+                // Восстанавливаем текст
+                const decryptedText = cipher.reconstructText(upperBytes, lowerBytes, currentOriginalLength, paddingChar);
+                document.getElementById('inputText').value = decryptedText;
+                
+                // Визуализация восстановленных байтов
+                let upperHtml = '';
+                let lowerHtml = '';
+                
+                upperBytes.forEach((byte, index) => {
+                    upperHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                lowerBytes.forEach((byte, index) => {
+                    lowerHtml += `<div class="byte-pair">
+                        <span>Байт ${index}:</span>
+                        <span>${byte} (0x${byte.toString(16).padStart(2, '0')})</span>
+                    </div>`;
+                });
+                
+                document.getElementById('upperBytesVis').innerHTML = upperHtml;
+                document.getElementById('lowerBytesVis').innerHTML = lowerHtml;
                 
                 addToHistory(`Расшифровано: ${hexText} -> "${decryptedText}"`);
                 updateStatus('Текст успешно расшифрован!', 'success');
@@ -465,6 +537,7 @@
             document.getElementById('history').textContent = operationHistory.join('\n');
         }
 
+        // Авто-инициализация при загрузке
         window.addEventListener('load', () => {
             setTimeout(initializeBox, 1000);
         });
