@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Homophonic Cipher - Base64 Optimized</title>
+    <title>Enhanced Homophonic Cipher - With Affine Transformation</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -191,6 +191,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
         
         .result-title {
@@ -278,13 +279,37 @@
         .test-info {
             border-left: 4px solid var(--primary);
         }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .option-label {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .option-control {
+            flex: 2;
+        }
+
+        .affine-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Enhanced Homophonic Cipher - Base64 Optimized</h1>
-            <p class="subtitle">Base64 encoding for 2x smaller output (2 chars per homophone)</p>
+            <h1>Enhanced Homophonic Cipher</h1>
+            <p class="subtitle">With optional affine transformation for enhanced security</p>
         </header>
 
         <div class="grid">
@@ -319,6 +344,26 @@
                         <option value="none">No Diffusion (Testing)</option>
                     </select>
                 </div>
+
+                <div class="advanced-options">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Advanced Security Options</h3>
+                    
+                    <div class="option-row">
+                        <div class="option-label">Enable Affine Transformation:</div>
+                        <div class="option-control">
+                            <input type="checkbox" id="enableAffine" checked>
+                        </div>
+                    </div>
+                    
+                    <div class="affine-info">
+                        <strong>Affine Transformation:</strong> Adds non-linear diffusion using GF(256) arithmetic.<br>
+                        <strong>Effect:</strong> Even without CBC, provides enhanced security against frequency analysis.
+                    </div>
+                </div>
+
+                <div class="compression-info">
+                    <h3 style="color: var(--secondary); margin-bottom: 0.5rem;">Encoding Information</h3>
+                    <p>Compression ratio: 1 byte → 2 characters/p>
                 </div>
             </div>
 
@@ -385,13 +430,12 @@
         </div>
 
         <div class="footer">
-            <p>Enhanced Homophonic Cipher System v5.0 | Optimized with Base64 encoding</p>
+            <p>Enhanced Homophonic Cipher System v6.0 | With Optional Affine Transformation</p>
             <p>© 2024 Cryptographic Systems | All operations performed client-side</p>
         </div>
     </div>
 
     <script>
-        // Правильный Base64 алфавит (стандартный)
         const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
         class DeterministicSBoxGenerator {
@@ -399,7 +443,6 @@
                 const sbox = new Array(256);
                 const inverseSbox = new Map();
                 
-                // Создаем ВСЕ возможные омофоны (4096 комбинаций)
                 const allHomophones = [];
                 for (let i = 0; i < 64; i++) {
                     for (let j = 0; j < 64; j++) {
@@ -407,7 +450,6 @@
                     }
                 }
                 
-                // Детерминистически перемешиваем омофоны на основе ключа
                 const shuffledHomophones = await this.deterministicShuffle(allHomophones, encryptionKey);
                 
                 let homophoneIndex = 0;
@@ -433,18 +475,14 @@
                     false, ['sign']
                 );
                 
-                // Fisher-Yates shuffle с детерминистичными случайными числами
                 for (let i = length - 1; i > 0; i--) {
-                    // Генерируем детерминистичный индекс на основе ключа и позиции
                     const positionData = new Uint8Array([i >> 8, i & 0xFF]);
                     const hmacBuffer = await crypto.subtle.sign('HMAC', hmacKey, positionData);
                     const hmacArray = new Uint8Array(hmacBuffer);
                     
-                    // Создаем случайное число из байтов HMAC
                     const randomValue = (hmacArray[0] << 8) | hmacArray[1];
                     const j = randomValue % (i + 1);
                     
-                    // Меняем местами омофоны
                     [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
                 }
                 
@@ -457,6 +495,11 @@
                 this.sbox = null;
                 this.inverseSbox = null;
                 this.initializationVector = null;
+                this.enableAffine = true;
+            }
+
+            setAffineTransformation(enabled) {
+                this.enableAffine = enabled;
             }
 
             async initializeWithKey(passphrase, iterations = 500000) {
@@ -498,6 +541,60 @@
                 }
             }
 
+            affineTransform(inputByte, state) {
+                if (!this.enableAffine) return inputByte;
+                
+                const a = 0x1F;
+                const b = state;
+                
+                let result = 0;
+                for (let i = 0; i < 8; i++) {
+                    if (a & (1 << i)) {
+                        result ^= inputByte << i;
+                    }
+                }
+                
+                for (let i = 14; i >= 8; i--) {
+                    if (result & (1 << i)) {
+                        result ^= 0x11B << (i - 8);
+                    }
+                }
+                
+                return (result ^ b) & 0xFF;
+            }
+
+            inverseAffineTransform(inputByte, state) {
+                if (!this.enableAffine) return inputByte;
+                
+                const a = 0x1F;
+                const b = state;
+                
+                let inverseA = 1;
+                for (let i = 0; i < 254; i++) {
+                    inverseA = this.gfMultiply(inverseA, a);
+                }
+                
+                const temp = (inputByte ^ b) & 0xFF;
+                return this.gfMultiply(inverseA, temp);
+            }
+
+            gfMultiply(a, b) {
+                let result = 0;
+                for (let i = 0; i < 8; i++) {
+                    if (b & (1 << i)) {
+                        result ^= a << i;
+                    }
+                }
+                
+                for (let i = 14; i >= 8; i--) {
+                    if (result & (1 << i)) {
+                        result ^= 0x11B << (i - 8);
+                    }
+                }
+                
+                return result & 0xFF;
+            }
+
             async encryptData(plaintext, diffusionMode = 'cbc') {
                 try {
                     const encoder = new TextEncoder();
@@ -505,6 +602,7 @@
                     const homophones = [];
                     
                     let previousBlock = null;
+                    let affineState = 0;
                     
                     if (diffusionMode === 'cbc') {
                         this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
@@ -519,6 +617,11 @@
                     
                     for (let i = 0; i < plaintextBuffer.length; i++) {
                         let byteToEncrypt = plaintextBuffer[i];
+                        
+                        if (this.enableAffine) {
+                            byteToEncrypt = this.affineTransform(byteToEncrypt, affineState);
+                            affineState = (affineState + byteToEncrypt) & 0xFF;
+                        }
                         
                         if (diffusionMode === 'cbc' && previousBlock) {
                             byteToEncrypt ^= previousBlock[i % 16];
@@ -552,6 +655,7 @@
                     let ivHomophones = [];
                     let cipherHomophones = homophones;
                     let previousBlock = null;
+                    let affineState = 0;
                     
                     if (diffusionMode === 'cbc') {
                         if (homophones.length < 16) {
@@ -578,6 +682,11 @@
                         
                         if (diffusionMode === 'cbc' && previousBlock) {
                             decryptedByte ^= previousBlock[i % 16];
+                        }
+                        
+                        if (this.enableAffine) {
+                            decryptedByte = this.inverseAffineTransform(decryptedByte, affineState);
+                            affineState = (affineState + this.inverseSbox.get(homophone)) & 0xFF;
                         }
                         
                         plaintextBuffer[i] = decryptedByte;
@@ -646,6 +755,10 @@
                 document.getElementById('decryptBtn').addEventListener('click', () => this.handleDecrypt());
                 document.getElementById('clearBtn').addEventListener('click', () => this.handleClear());
                 document.getElementById('analyzeBtn').addEventListener('click', () => this.handleAnalyze());
+                
+                document.getElementById('enableAffine').addEventListener('change', (e) => {
+                    this.cipher.setAffineTransformation(e.target.checked);
+                });
             }
 
             async handleEncrypt() {
@@ -663,12 +776,14 @@
                     const iterations = parseInt(document.getElementById('iterations').value);
                     const diffusionMode = document.getElementById('diffusionMode').value;
                     const inputData = document.getElementById('inputData').value;
+                    const enableAffine = document.getElementById('enableAffine').checked;
 
+                    this.cipher.setAffineTransformation(enableAffine);
                     await this.cipher.initializeWithKey(passphrase, iterations);
                     const result = await this.cipher.encryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    this.updateSecurityInfo('encrypt', inputData.length, result.length, diffusionMode);
+                    this.updateSecurityInfo('encrypt', inputData.length, result.length, diffusionMode, enableAffine);
                     this.runAutomaticTests(result);
                     this.setStatus('ready', 'Encryption successful');
                 } catch (error) {
@@ -732,12 +847,14 @@
                     const iterations = parseInt(document.getElementById('iterations').value);
                     const diffusionMode = document.getElementById('diffusionMode').value;
                     const inputData = document.getElementById('inputData').value;
+                    const enableAffine = document.getElementById('enableAffine').checked;
 
+                    this.cipher.setAffineTransformation(enableAffine);
                     await this.cipher.initializeWithKey(passphrase, iterations);
                     const result = await this.cipher.decryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    this.updateSecurityInfo('decrypt', inputData.length, result.length, diffusionMode);
+                    this.updateSecurityInfo('decrypt', inputData.length, result.length, diffusionMode, enableAffine);
                     this.setStatus('ready', 'Decryption successful');
                 } catch (error) {
                     this.setStatus('error', 'Decryption failed: ' + error.message);
@@ -763,17 +880,21 @@
                 
                 setTimeout(() => {
                     this.setStatus('ready', 'Security analysis complete');
-                    document.getElementById('securityInfo').textContent = 
-                        'Security Analysis:\n' +
-                        '• Deterministic S-Box generation\n' +
-                        '• Password-based salt for key derivation\n' +
-                        '• 512-bit key material via PBKDF2-HMAC-SHA512\n' +
-                        '• 4096-element homophonic encoding\n' +
-                        '• Base64 encoding (2 chars per homophone)\n' +
-                        '• 16:1 homophone-to-byte ratio\n' +
-                        '• Non-deterministic encryption (semantic security)\n' +
-                        '• Multiple diffusion modes (CBC, CFB, OFB)\n' +
-                        '• 2x smaller output compared to HEX encoding';
+                    const enableAffine = document.getElementById('enableAffine').checked;
+                    let info = 'Security Analysis:\n';
+                    info += '• Deterministic S-Box generation\n';
+                    info += '• Password-based salt for key derivation\n';
+                    info += '• 512-bit key material via PBKDF2-HMAC-SHA512\n';
+                    info += '• 4096-element homophonic encoding\n';
+                    if (enableAffine) {
+                        info += '• Affine transformation for non-linearity\n';
+                        info += '• GF(256) multiplication for diffusion\n';
+                    }
+                    info += '• Base64 encoding (2 chars per homophone)\n';
+                    info += '• 16:1 homophone-to-byte ratio\n';
+                    info += '• Non-deterministic encryption (semantic security)';
+                    
+                    document.getElementById('securityInfo').textContent = info;
                 }, 1000);
             }
 
@@ -799,12 +920,13 @@
                 if (buttonElement) buttonElement.disabled = false;
             }
 
-            updateSecurityInfo(operation, inputLength, outputLength, diffusionMode) {
+            updateSecurityInfo(operation, inputLength, outputLength, diffusionMode, enableAffine) {
                 let info = `Operation: ${operation.toUpperCase()}\n`;
                 info += `Input length: ${inputLength} characters\n`;
                 info += `Output length: ${outputLength} characters\n`;
                 info += `Compression ratio: ${(outputLength/inputLength).toFixed(2)}:1\n`;
                 info += `Diffusion mode: ${diffusionMode}\n`;
+                info += `Affine transformation: ${enableAffine ? 'Enabled' : 'Disabled'}\n`;
                 
                 if (diffusionMode === 'cbc') {
                     info += `IV: 16 bytes (encoded as 16 homophones)\n`;
