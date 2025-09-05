@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Homophonic Cipher - With Affine Transformation</title>
+    <title>Enhanced Homophonic Cipher - Fixed Affine Transformation</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -303,13 +303,26 @@
             margin-top: 0.5rem;
             font-size: 0.8rem;
         }
+        
+        .entropy-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .entropy-value {
+            font-weight: bold;
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Enhanced Homophonic Cipher</h1>
-            <p class="subtitle">With optional affine transformation for enhanced security</p>
+            <p class="subtitle">With FIXED affine transformation implementation</p>
         </header>
 
         <div class="grid">
@@ -363,7 +376,11 @@
 
                 <div class="compression-info">
                     <h3 style="color: var(--secondary); margin-bottom: 0.5rem;">Encoding Information</h3>
-                    <p>Compression ratio: 1 byte → 2 characters/p>
+                    <p>Base64 encoding: 64 characters × 64 characters = 4096 homophones</p>
+                    <p>Compression ratio: 1 byte → 2 characters (vs 4 characters in HEX)</p>
+                    <div class="base64-chars">
+                        Base64 characters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+                    </div>
                 </div>
             </div>
 
@@ -394,6 +411,13 @@
                 <div class="form-group">
                     <label for="outputStats">Output Statistics:</label>
                     <div id="outputStats" class="result-content">Waiting for operation...</div>
+                </div>
+                
+                <div class="entropy-display">
+                    <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Entropy Analysis</h3>
+                    <div id="entropyWithoutAffine" class="result-content">Without affine: N/A</div>
+                    <div id="entropyWithAffine" class="result-content">With affine: N/A</div>
+                    <div id="entropyDifference" class="result-content">Difference: N/A</div>
                 </div>
             </div>
         </div>
@@ -430,7 +454,7 @@
         </div>
 
         <div class="footer">
-            <p>Enhanced Homophonic Cipher System v6.0 | With Optional Affine Transformation</p>
+            <p>Enhanced Homophonic Cipher System v6.0 | With FIXED Affine Transformation</p>
             <p>© 2024 Cryptographic Systems | All operations performed client-side</p>
         </div>
     </div>
@@ -569,6 +593,7 @@
                 const a = 0x1F;
                 const b = state;
                 
+                // Вычисляем обратный элемент для a в GF(256)
                 let inverseA = 1;
                 for (let i = 0; i < 254; i++) {
                     inverseA = this.gfMultiply(inverseA, a);
@@ -618,13 +643,16 @@
                     for (let i = 0; i < plaintextBuffer.length; i++) {
                         let byteToEncrypt = plaintextBuffer[i];
                         
-                        if (this.enableAffine) {
-                            byteToEncrypt = this.affineTransform(byteToEncrypt, affineState);
-                            affineState = (affineState + byteToEncrypt) & 0xFF;
-                        }
-                        
+                        // Применяем CBC ДО афинного преобразования
                         if (diffusionMode === 'cbc' && previousBlock) {
                             byteToEncrypt ^= previousBlock[i % 16];
+                        }
+                        
+                        // Применяем афинное преобразование
+                        if (this.enableAffine) {
+                            byteToEncrypt = this.affineTransform(byteToEncrypt, affineState);
+                            // Обновляем состояние на основе исходного байта
+                            affineState = (affineState + plaintextBuffer[i]) & 0xFF;
                         }
                         
                         const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
@@ -680,16 +708,22 @@
                         const homophone = cipherHomophones[i];
                         let decryptedByte = this.inverseSbox.get(homophone);
                         
+                        // Применяем обратное афинное преобразование
+                        if (this.enableAffine) {
+                            decryptedByte = this.inverseAffineTransform(decryptedByte, affineState);
+                        }
+                        
+                        // Применяем CBC после обратного преобразования
                         if (diffusionMode === 'cbc' && previousBlock) {
                             decryptedByte ^= previousBlock[i % 16];
                         }
                         
-                        if (this.enableAffine) {
-                            decryptedByte = this.inverseAffineTransform(decryptedByte, affineState);
-                            affineState = (affineState + this.inverseSbox.get(homophone)) & 0xFF;
-                        }
-                        
                         plaintextBuffer[i] = decryptedByte;
+                        
+                        // Обновляем состояние на основе расшифрованного байта
+                        if (this.enableAffine) {
+                            affineState = (affineState + decryptedByte) & 0xFF;
+                        }
                         
                         if (diffusionMode === 'cbc') {
                             previousBlock[i % 16] = this.inverseSbox.get(homophone);
@@ -786,11 +820,43 @@
                     this.updateSecurityInfo('encrypt', inputData.length, result.length, diffusionMode, enableAffine);
                     this.runAutomaticTests(result);
                     this.setStatus('ready', 'Encryption successful');
+                    
+                    // Calculate entropy with and without affine
+                    await this.calculateEntropyComparison(passphrase, iterations, inputData, diffusionMode);
                 } catch (error) {
                     this.setStatus('error', 'Encryption failed: ' + error.message);
                     console.error('Encryption error:', error);
                 } finally {
                     this.hideLoading('encrypt');
+                }
+            }
+
+            async calculateEntropyComparison(passphrase, iterations, inputData, diffusionMode) {
+                try {
+                    // Calculate entropy without affine
+                    const cipherWithoutAffine = new EnhancedHomophonicCipher();
+                    cipherWithoutAffine.setAffineTransformation(false);
+                    await cipherWithoutAffine.initializeWithKey(passphrase, iterations);
+                    const resultWithoutAffine = await cipherWithoutAffine.encryptData(inputData, diffusionMode);
+                    const entropyWithout = CipherTestSuite.calculateEntropy(resultWithoutAffine);
+                    
+                    // Calculate entropy with affine
+                    const cipherWithAffine = new EnhancedHomophonicCipher();
+                    cipherWithAffine.setAffineTransformation(true);
+                    await cipherWithAffine.initializeWithKey(passphrase, iterations);
+                    const resultWithAffine = await cipherWithAffine.encryptData(inputData, diffusionMode);
+                    const entropyWith = CipherTestSuite.calculateEntropy(resultWithAffine);
+                    
+                    // Display results
+                    document.getElementById('entropyWithoutAffine').textContent = 
+                        `Without affine: ${entropyWithout.toFixed(6)}`;
+                    document.getElementById('entropyWithAffine').textContent = 
+                        `With affine: ${entropyWith.toFixed(6)}`;
+                    document.getElementById('entropyDifference').textContent = 
+                        `Difference: ${(entropyWith - entropyWithout).toFixed(6)}`;
+                    
+                } catch (error) {
+                    console.error('Entropy comparison failed:', error);
                 }
             }
 
@@ -871,6 +937,9 @@
                 const testResultsDiv = document.getElementById('testResults');
                 if (testResultsDiv) testResultsDiv.innerHTML = '';
                 document.getElementById('outputStats').textContent = 'Waiting for operation...';
+                document.getElementById('entropyWithoutAffine').textContent = 'Without affine: N/A';
+                document.getElementById('entropyWithAffine').textContent = 'With affine: N/A';
+                document.getElementById('entropyDifference').textContent = 'Difference: N/A';
                 this.setStatus('ready', 'Ready');
                 this.setTestStatus('ready', 'Ready to test');
             }
@@ -889,6 +958,7 @@
                     if (enableAffine) {
                         info += '• Affine transformation for non-linearity\n';
                         info += '• GF(256) multiplication for diffusion\n';
+                        info += '• Correct state synchronization\n';
                     }
                     info += '• Base64 encoding (2 chars per homophone)\n';
                     info += '• 16:1 homophone-to-byte ratio\n';
