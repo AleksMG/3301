@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Homophonic Cipher - Base64 Optimized</title>
     <style>
-        /* Стили остаются практически без изменений */
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
@@ -218,31 +217,6 @@
         .status-processing { background: var(--warning); }
         .status-error { background: var(--danger); }
         
-        .sbox-visualization {
-            margin-top: 2rem;
-        }
-        
-        .sbox-grid {
-            display: grid;
-            grid-template-columns: repeat(18, 1fr);
-            gap: 2px;
-            margin-top: 1rem;
-            font-size: 0.7rem;
-        }
-        
-        .sbox-cell {
-            padding: 0.5rem;
-            text-align: center;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 0.25rem;
-            font-family: 'Monaco', 'Menlo', monospace;
-        }
-        
-        .sbox-header {
-            background: var(--primary);
-            font-weight: 600;
-        }
-        
         .footer {
             text-align: center;
             margin-top: 2rem;
@@ -281,13 +255,36 @@
             margin-top: 0.5rem;
             word-break: break-all;
         }
+
+        .test-result {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            background: rgba(15, 23, 42, 0.4);
+        }
+        
+        .test-pass {
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .test-fail {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .test-warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .test-info {
+            border-left: 4px solid var(--primary);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Enhanced Homophonic Cipher - Base64 Optimized</h1>
-            <p class="subtitle">Base64 encoding for 3x smaller output (2 chars per homophone)</p>
+            <p class="subtitle">Base64 encoding for 2x smaller output (2 chars per homophone)</p>
         </header>
 
         <div class="grid">
@@ -323,42 +320,12 @@
                     </select>
                 </div>
 
-                <div class="advanced-options">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Advanced Options</h3>
-                    
-                    <div class="option-row">
-                        <div class="option-label">Enable MixColumns:</div>
-                        <div class="option-control">
-                            <input type="checkbox" id="enableMixColumns" checked>
-                        </div>
-                    </div>
-                    
-                    <div class="option-row">
-                        <div class="option-label">MixColumns Rounds:</div>
-                        <div class="option-control">
-                            <select id="mixColumnsRounds">
-                                <option value="1">1 Round (Standard)</option>
-                                <option value="3" selected>3 Rounds (Enhanced)</option>
-                                <option value="6">6 Rounds (Strong)</option>
-                                <option value="12">12 Rounds (Maximum)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="option-row">
-                        <div class="option-label">Enable Non-Linearity:</div>
-                        <div class="option-control">
-                            <input type="checkbox" id="enableNonLinearity" checked>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="compression-info">
                     <h3 style="color: var(--secondary); margin-bottom: 0.5rem;">Optimization Info</h3>
                     <p>Using Base64 encoding: 64 characters × 64 characters = 4096 homophones</p>
                     <p>Ratio: 1 byte → 2 characters (vs 4 characters in HEX)</p>
                     <div class="base64-chars">
-                        Base64 characters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+                        Base64 characters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+
                     </div>
                 </div>
             </div>
@@ -411,13 +378,6 @@
                 </div>
                 <div id="securityInfo" class="result-content"></div>
             </div>
-
-            <div class="output-preview">
-                <div class="result-header">
-                    <span class="result-title">Output Preview:</span>
-                </div>
-                <div id="outputPreview" class="result-content"></div>
-            </div>
         </div>
 
         <div class="card">
@@ -439,6 +399,9 @@
     </div>
 
     <script>
+        // Base64 character set (URL-safe)
+        const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
         class GaloisField {
             static multiply(a, b) {
                 let p = 0;
@@ -453,12 +416,8 @@
             }
         }
 
-        // Base64 character set (64 characters)
-        const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
         class DeterministicSBoxGenerator {
             static async generateSBox(encryptionKey) {
-                // 4096 омофонов (0-4095)
                 const homophoneCount = 4096;
                 const sbox = new Array(256);
                 const inverseSbox = new Map();
@@ -469,13 +428,11 @@
                     false, ['sign']
                 );
                 
-                // Создаем массив омофонов (0-4095)
                 const allHomophones = Array.from({length: homophoneCount}, (_, i) => i);
                 await this.fastDeterministicShuffle(allHomophones, hmacKey);
                 
                 let index = 0;
                 for (let inputByte = 0; inputByte < 256; inputByte++) {
-                    // Каждому байту соответствует 16 омофонов (4096/256 = 16)
                     sbox[inputByte] = new Array(16);
                     for (let homophoneIndex = 0; homophoneIndex < 16; homophoneIndex++) {
                         const homophone = allHomophones[index++ % homophoneCount];
@@ -513,19 +470,6 @@
                 this.sbox = null;
                 this.inverseSbox = null;
                 this.initializationVector = null;
-                this.hmacKey = null;
-                this.enableMixColumns = true;
-                this.mixColumnsRounds = 3;
-                this.enableNonLinearity = true;
-            }
-
-            setMixColumnsRounds(rounds) {
-                const validRounds = [1, 3, 6, 12];
-                this.mixColumnsRounds = validRounds.includes(rounds) ? rounds : 1;
-            }
-
-            setNonLinearity(enabled) {
-                this.enableNonLinearity = enabled;
             }
 
             async initializeWithKey(passphrase, iterations = 500000) {
@@ -565,108 +509,6 @@
                     console.error('Key initialization failed:', error);
                     throw new Error('Key derivation failed: ' + error.message);
                 }
-            }
-
-            setMixColumns(enabled) {
-                this.enableMixColumns = enabled;
-            }
-
-            applySingleMixColumnsRound(data) {
-                const result = new Uint8Array(data.length);
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    if (i + 3 >= data.length) break;
-                    
-                    const a0 = data[i];
-                    const a1 = data[i + 1];
-                    const a2 = data[i + 2];
-                    const a3 = data[i + 3];
-                    
-                    result[i] = GaloisField.multiply(0x02, a0) ^ GaloisField.multiply(0x03, a1) ^ a2 ^ a3;
-                    result[i + 1] = a0 ^ GaloisField.multiply(0x02, a1) ^ GaloisField.multiply(0x03, a2) ^ a3;
-                    result[i + 2] = a0 ^ a1 ^ GaloisField.multiply(0x02, a2) ^ GaloisField.multiply(0x03, a3);
-                    result[i + 3] = GaloisField.multiply(0x03, a0) ^ a1 ^ a2 ^ GaloisField.multiply(0x02, a3);
-                }
-                
-                for (let i = Math.floor(data.length / 4) * 4; i < data.length; i++) {
-                    result[i] = data[i];
-                }
-                
-                return result;
-            }
-
-            applySingleInvMixColumnsRound(data) {
-                const result = new Uint8Array(data.length);
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    if (i + 3 >= data.length) break;
-                    
-                    const a0 = data[i];
-                    const a1 = data[i + 1];
-                    const a2 = data[i + 2];
-                    const a3 = data[i + 3];
-                    
-                    result[i] = GaloisField.multiply(0x0e, a0) ^ GaloisField.multiply(0x0b, a1) ^ 
-                                GaloisField.multiply(0x0d, a2) ^ GaloisField.multiply(0x09, a3);
-                    result[i + 1] = GaloisField.multiply(0x09, a0) ^ GaloisField.multiply(0x0e, a1) ^ 
-                                    GaloisField.multiply(0x0b, a2) ^ GaloisField.multiply(0x0d, a3);
-                    result[i + 2] = GaloisField.multiply(0x0d, a0) ^ GaloisField.multiply(0x09, a1) ^ 
-                                    GaloisField.multiply(0x0e, a2) ^ GaloisField.multiply(0x0b, a3);
-                    result[i + 3] = GaloisField.multiply(0x0b, a0) ^ GaloisField.multiply(0x0d, a1) ^ 
-                                    GaloisField.multiply(0x09, a2) ^ GaloisField.multiply(0x0e, a3);
-                }
-                
-                for (let i = Math.floor(data.length / 4) * 4; i < data.length; i++) {
-                    result[i] = data[i];
-                }
-                
-                return result;
-            }
-
-            generateRoundConstants(round) {
-                const constants = new Uint8Array(4);
-                for (let i = 0; i < 4; i++) {
-                    constants[i] = (round * 0x17 + i * 0x37) & 0xFF;
-                }
-                return constants;
-            }
-
-            mixColumns(data) {
-                if (!this.enableMixColumns) return data;
-
-                let processedData = new Uint8Array(data);
-                
-                for (let round = 0; round < this.mixColumnsRounds; round++) {
-                    processedData = this.applySingleMixColumnsRound(processedData);
-                    
-                    if (this.enableNonLinearity) {
-                        const roundConstants = this.generateRoundConstants(round);
-                        for (let i = 0; i < processedData.length; i++) {
-                            processedData[i] ^= roundConstants[i % 4];
-                        }
-                    }
-                }
-                
-                return processedData;
-            }
-
-            invMixColumns(data) {
-                if (!this.enableMixColumns) return data;
-
-                let processedData = new Uint8Array(data);
-                
-                for (let round = this.mixColumnsRounds - 1; round >= 0; round--) {
-                    if (this.enableNonLinearity) {
-                        const roundConstants = this.generateRoundConstants(round);
-                        for (let i = 0; i < processedData.length; i++) {
-                            processedData[i] ^= roundConstants[i % 4];
-                        }
-                    }
-                    
-                    processedData = this.applySingleInvMixColumnsRound(processedData);
-                }
-                
-                return processedData;
             }
 
             // Преобразуем омофон (0-4095) в два Base64 символа
@@ -727,7 +569,7 @@
                     const homophones = [];
                     
                     this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
-                    let previousBlock = this.initializationVector;
+                    let previousBlock = new Uint8Array(this.initializationVector);
                     
                     for (let i = 0; i < plaintextBuffer.length; i++) {
                         const plainByte = plaintextBuffer[i];
@@ -744,86 +586,61 @@
                         homophones.push(homophone);
                         
                         if (diffusionMode === 'cbc') {
-                            previousBlock = this.updateDiffusionBlock(previousBlock, homophone);
+                            // Обновляем блок для следующей итерации
+                            const homophoneBytes = new Uint8Array([
+                                (homophone >> 8) & 0xFF,
+                                homophone & 0xFF
+                            ]);
+                            
+                            for (let j = 0; j < 16; j++) {
+                                previousBlock[j] ^= homophoneBytes[j % 2];
+                            }
                         }
                     }
                     
-                    // Преобразуем омофоны в байты для MixColumns
-                    const homophoneBytes = new Uint8Array(homophones.length * 2);
-                    for (let i = 0; i < homophones.length; i++) {
-                        homophoneBytes[i * 2] = (homophones[i] >> 8) & 0xFF;
-                        homophoneBytes[i * 2 + 1] = homophones[i] & 0xFF;
-                    }
-                    
-                    let outputBuffer;
-                    if (this.enableMixColumns) {
-                        const mixedData = this.mixColumns(homophoneBytes);
-                        
-                        outputBuffer = new Uint8Array(16 + mixedData.length);
-                        outputBuffer.set(this.initializationVector, 0);
-                        outputBuffer.set(mixedData, 16);
-                    } else {
-                        outputBuffer = new Uint8Array(16 + homophoneBytes.length);
-                        outputBuffer.set(this.initializationVector, 0);
-                        outputBuffer.set(homophoneBytes, 16);
-                    }
-
-                    // Преобразуем байты обратно в омофоны
-                    const finalHomophones = [];
-                    for (let i = 16; i < outputBuffer.length; i += 2) {
-                        if (i + 1 < outputBuffer.length) {
-                            const homophone = (outputBuffer[i] << 8) | outputBuffer[i + 1];
-                            finalHomophones.push(homophone);
+                    // Кодируем IV и омофоны в Base64
+                    const ivHomophones = [];
+                    for (let i = 0; i < 16; i += 2) {
+                        if (i + 1 < 16) {
+                            const homophone = (this.initializationVector[i] << 8) | this.initializationVector[i + 1];
+                            ivHomophones.push(homophone);
                         }
                     }
                     
-                    // Кодируем омофоны в Base64 строку
-                    return this.homophonesToBase64(finalHomophones);
+                    const allHomophones = [...ivHomophones, ...homophones];
+                    return this.homophonesToBase64(allHomophones);
                     
                 } catch (error) {
                     console.error('Encryption failed:', error);
-                    throw new Error('Encryption process failed');
+                    throw new Error('Encryption process failed: ' + error.message);
                 }
             }
 
             async decryptData(encryptedData, diffusionMode = 'cbc') {
                 try {
                     // Преобразуем Base64 строку обратно в омофоны
-                    const homophones = this.base64ToHomophones(encryptedData);
+                    const allHomophones = this.base64ToHomophones(encryptedData);
                     
-                    // Преобразуем омофоны в байты
-                    const homophoneBytes = new Uint8Array(homophones.length * 2);
-                    for (let i = 0; i < homophones.length; i++) {
-                        homophoneBytes[i * 2] = (homophones[i] >> 8) & 0xFF;
-                        homophoneBytes[i * 2 + 1] = homophones[i] & 0xFF;
-                    }
-                    
-                    // Выделяем IV и зашифрованные данные
-                    if (homophoneBytes.length < 16) {
+                    // Извлекаем IV (первые 8 омофонов = 16 байт)
+                    if (allHomophones.length < 8) {
                         throw new Error('Invalid encrypted data format');
                     }
                     
-                    const iv = homophoneBytes.slice(0, 16);
-                    let ciphertextBytes = homophoneBytes.slice(16);
+                    const ivHomophones = allHomophones.slice(0, 8);
+                    const cipherHomophones = allHomophones.slice(8);
                     
-                    if (this.enableMixColumns) {
-                        ciphertextBytes = this.invMixColumns(ciphertextBytes);
+                    // Восстанавливаем IV из омофонов
+                    const iv = new Uint8Array(16);
+                    for (let i = 0; i < 8; i++) {
+                        iv[i * 2] = (ivHomophones[i] >> 8) & 0xFF;
+                        iv[i * 2 + 1] = ivHomophones[i] & 0xFF;
                     }
                     
-                    // Преобразуем байты обратно в омофоны
-                    const ciphertextHomophones = [];
-                    for (let i = 0; i < ciphertextBytes.length; i += 2) {
-                        if (i + 1 < ciphertextBytes.length) {
-                            const homophone = (ciphertextBytes[i] << 8) | ciphertextBytes[i + 1];
-                            ciphertextHomophones.push(homophone);
-                        }
-                    }
+                    let plaintextBuffer = new Uint8Array(cipherHomophones.length);
+                    let previousBlock = new Uint8Array(iv);
                     
-                    let plaintextBuffer = new Uint8Array(ciphertextHomophones.length);
-                    let previousBlock = iv;
-                    
-                    for (let i = 0; i < ciphertextHomophones.length; i++) {
-                        const homophone = ciphertextHomophones[i];
+                    for (let i = 0; i < cipherHomophones.length; i++) {
+                        const homophone = cipherHomophones[i];
                         
                         if (!this.inverseSbox.has(homophone)) {
                             throw new Error('Invalid homophone in ciphertext');
@@ -838,7 +655,15 @@
                         plaintextBuffer[i] = decryptedByte;
                         
                         if (diffusionMode === 'cbc') {
-                            previousBlock = this.updateDiffusionBlock(previousBlock, homophone);
+                            // Обновляем блок для следующей итерации
+                            const homophoneBytes = new Uint8Array([
+                                (homophone >> 8) & 0xFF,
+                                homophone & 0xFF
+                            ]);
+                            
+                            for (let j = 0; j < 16; j++) {
+                                previousBlock[j] ^= homophoneBytes[j % 2];
+                            }
                         }
                     }
                     
@@ -849,35 +674,6 @@
                     console.error('Decryption failed:', error);
                     throw new Error('Decryption process failed: ' + error.message);
                 }
-            }
-
-            updateDiffusionBlock(block, homophone) {
-                const newBlock = new Uint8Array(16);
-                const homophoneBytes = new Uint8Array([
-                    (homophone >> 8) & 0xFF,
-                    homophone & 0xFF
-                ]);
-                
-                for (let i = 0; i < 16; i++) {
-                    newBlock[i] = block[i] ^ homophoneBytes[i % 2];
-                }
-                
-                return newBlock;
-            }
-
-            getSBoxPreview() {
-                if (!this.sbox) return null;
-                
-                const preview = [];
-                for (let i = 0; i < 16; i++) {
-                    const row = [];
-                    for (let j = 0; j < 16; j++) {
-                        const byteValue = i * 16 + j;
-                        row.push(this.sbox[byteValue].slice(0, 2).map(v => v.toString(16).padStart(3, '0')).join(', '));
-                    }
-                    preview.push(row);
-                }
-                return preview;
             }
         }
 
@@ -915,33 +711,6 @@
                     details: `Ideal: >5.9 (perfect randomness)\nBased on ${encryptedData.length} characters`
                 });
                 
-                // Анализ распределения символов
-                const charFreq = {};
-                for (const char of encryptedData) {
-                    if (BASE64_CHARS.includes(char)) {
-                        charFreq[char] = (charFreq[char] || 0) + 1;
-                    }
-                }
-                
-                const sorted = Object.entries(charFreq).sort((a, b) => b[1] - a[1]);
-                let freqReport = `Base64 character frequency analysis:\n`;
-                freqReport += `Total characters: ${encryptedData.length}\n`;
-                freqReport += `Unique characters: ${sorted.length}/64\n\n`;
-                
-                freqReport += `Top 10 most frequent characters:\n`;
-                for (let i = 0; i < Math.min(10, sorted.length); i++) {
-                    const [char, count] = sorted[i];
-                    const percentage = (count / encryptedData.length * 100).toFixed(3);
-                    freqReport += `'${char}': ${count} (${percentage}%)\n`;
-                }
-                
-                results.push({
-                    name: "Base64 Character Distribution",
-                    status: "INFO",
-                    message: "Analysis of Base64 character frequencies",
-                    details: freqReport
-                });
-                
                 return results;
             }
         }
@@ -953,28 +722,10 @@
             }
 
             initializeEventListeners() {
-                const encryptBtn = document.getElementById('encryptBtn');
-                const decryptBtn = document.getElementById('decryptBtn');
-                const clearBtn = document.getElementById('clearBtn');
-                const analyzeBtn = document.getElementById('analyzeBtn');
-                const enableMixColumns = document.getElementById('enableMixColumns');
-                const mixColumnsRounds = document.getElementById('mixColumnsRounds');
-                const enableNonLinearity = document.getElementById('enableNonLinearity');
-
-                encryptBtn.addEventListener('click', () => this.handleEncrypt());
-                decryptBtn.addEventListener('click', () => this.handleDecrypt());
-                clearBtn.addEventListener('click', () => this.handleClear());
-                analyzeBtn.addEventListener('click', () => this.handleAnalyze());
-                
-                enableMixColumns.addEventListener('change', () => {
-                    this.cipher.setMixColumns(enableMixColumns.checked);
-                });
-                mixColumnsRounds.addEventListener('change', () => {
-                    this.cipher.setMixColumnsRounds(parseInt(mixColumnsRounds.value));
-                });
-                enableNonLinearity.addEventListener('change', () => {
-                    this.cipher.setNonLinearity(enableNonLinearity.checked);
-                });
+                document.getElementById('encryptBtn').addEventListener('click', () => this.handleEncrypt());
+                document.getElementById('decryptBtn').addEventListener('click', () => this.handleDecrypt());
+                document.getElementById('clearBtn').addEventListener('click', () => this.handleClear());
+                document.getElementById('analyzeBtn').addEventListener('click', () => this.handleAnalyze());
             }
 
             async handleEncrypt() {
@@ -989,10 +740,6 @@
                         throw new Error('Key confirmation does not match');
                     }
 
-                    if (passphrase.length < 12) {
-                        throw new Error('Passphrase must be at least 12 characters');
-                    }
-
                     const iterations = parseInt(document.getElementById('iterations').value);
                     const diffusionMode = document.getElementById('diffusionMode').value;
                     const inputData = document.getElementById('inputData').value;
@@ -1001,13 +748,7 @@
                     const result = await this.cipher.encryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    
-                    document.getElementById('outputPreview').textContent = 
-                        `Encrypted: ${result.substring(0, 100)}...`;
-                    
                     this.updateSecurityInfo('encrypt', inputData.length, result.length);
-                    this.updateSBoxDisplay();
-
                     this.runAutomaticTests(result);
                     this.setStatus('ready', 'Encryption successful');
                 } catch (error) {
@@ -1072,11 +813,7 @@
                     const result = await this.cipher.decryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    document.getElementById('outputPreview').textContent = 
-                        `Decrypted: ${result.substring(0, 100)}...`;
-                    
                     this.updateSecurityInfo('decrypt', inputData.length, result.length);
-                    
                     this.setStatus('ready', 'Decryption successful');
                 } catch (error) {
                     this.setStatus('error', 'Decryption failed: ' + error.message);
@@ -1090,10 +827,8 @@
                 document.getElementById('inputData').value = '';
                 document.getElementById('outputData').textContent = '';
                 document.getElementById('securityInfo').textContent = '';
-                document.getElementById('outputPreview').textContent = '';
-                document.getElementById('testResults').textContent = '';
+                document.getElementById('testResults').innerHTML = '';
                 document.getElementById('outputStats').textContent = 'Waiting for operation...';
-                document.getElementById('sboxGrid').innerHTML = '';
                 this.setStatus('ready', 'Ready');
                 this.setTestStatus('ready', 'Ready to test');
             }
@@ -1112,8 +847,6 @@
                         '• Base64 encoding (2 chars per homophone)\n' +
                         '• 16:1 homophone-to-byte ratio\n' +
                         '• Non-deterministic encryption (semantic security)\n' +
-                        '• Multi-round MixColumns transformation\n' +
-                        '• Inter-round non-linearity enhancement\n' +
                         '• Multiple diffusion modes (CBC, CFB, OFB)\n' +
                         '• 2x smaller output compared to HEX encoding';
                 }, 1000);
@@ -1137,20 +870,12 @@
 
             updateSecurityInfo(operation, inputLength, outputLength) {
                 const diffusionMode = document.getElementById('diffusionMode').value;
-                const mixColumns = document.getElementById('enableMixColumns').checked;
-                const rounds = document.getElementById('mixColumnsRounds').value;
-                const nonLinearity = document.getElementById('enableNonLinearity').checked;
                 
                 let info = `Operation: ${operation.toUpperCase()}\n`;
                 info += `Input length: ${inputLength} characters\n`;
                 info += `Output length: ${outputLength} characters\n`;
                 info += `Compression ratio: ${(outputLength/inputLength).toFixed(2)}:1\n`;
                 info += `Diffusion mode: ${diffusionMode}\n`;
-                info += `MixColumns: ${mixColumns ? 'Enabled' : 'Disabled'}\n`;
-                if (mixColumns) {
-                    info += `MixColumns rounds: ${rounds}\n`;
-                    info += `Non-linearity: ${nonLinearity ? 'Enabled' : 'Disabled'}\n`;
-                }
                 info += `Homophone set: 4096 combinations\n`;
                 info += `Encoding: Base64 (2 chars per homophone)\n`;
                 info += `S-Box: Deterministic generation\n`;
@@ -1158,43 +883,8 @@
                 
                 document.getElementById('securityInfo').textContent = info;
                 
-                // Update statistics
                 const stats = `Input: ${inputLength} chars → Output: ${outputLength} chars (Ratio: ${(outputLength/inputLength).toFixed(2)}:1)`;
                 document.getElementById('outputStats').textContent = stats;
-            }
-
-            updateSBoxDisplay() {
-                const preview = this.cipher.getSBoxPreview();
-                if (!preview) return;
-
-                const grid = document.getElementById('sboxGrid');
-                grid.innerHTML = '';
-
-                const emptyHeader = document.createElement('div');
-                emptyHeader.className = 'sbox-cell sbox-header';
-                grid.appendChild(emptyHeader);
-
-                for (let j = 0; j < 16; j++) {
-                    const header = document.createElement('div');
-                    header.className = 'sbox-cell sbox-header';
-                    header.textContent = j.toString(16).toUpperCase();
-                    grid.appendChild(header);
-                }
-
-                for (let i = 0; i < 16; i++) {
-                    const rowHeader = document.createElement('div');
-                    rowHeader.className = 'sbox-cell sbox-header';
-                    rowHeader.textContent = i.toString(16).toUpperCase();
-                    grid.appendChild(rowHeader);
-
-                    for (let j = 0; j < 16; j++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'sbox-cell';
-                        cell.textContent = preview[i][j];
-                        cell.title = `S-Box[${i.toString(16).toUpperCase()}${j.toString(16).toUpperCase()}]`;
-                        grid.appendChild(cell);
-                    }
-                }
             }
         }
 
