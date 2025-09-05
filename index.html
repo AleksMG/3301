@@ -512,26 +512,25 @@
                     const plaintextBuffer = encoder.encode(plaintext);
                     const homophones = [];
                     
-                    // Только для CBC режима
+                    let previousBlock = null;
+                    
                     if (diffusionMode === 'cbc') {
                         // Генерируем случайный IV (16 байт)
                         this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
+                        previousBlock = new Uint8Array(this.initializationVector);
                         
-                        // Кодируем каждый байт IV в омофон
+                        // Кодируем каждый байт IV в омофон (всегда первый омофон для consistency)
                         for (let i = 0; i < 16; i++) {
                             const ivByte = this.initializationVector[i];
-                            const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
-                            const ivHomophone = this.sbox[ivByte][randomIndex];
+                            const ivHomophone = this.sbox[ivByte][0];
                             homophones.push(ivHomophone);
                         }
                     }
                     
-                    let previousBlock = diffusionMode === 'cbc' ? new Uint8Array(this.initializationVector) : null;
-                    
                     for (let i = 0; i < plaintextBuffer.length; i++) {
                         let byteToEncrypt = plaintextBuffer[i];
                         
-                        // CBC: XOR с соответствующим байтом предыдущего блока
+                        // CBC: XOR с соответствующим байтом предыдущего ЗАШИФРОВАННОГО блока
                         if (diffusionMode === 'cbc' && previousBlock) {
                             byteToEncrypt ^= previousBlock[i % 16];
                         }
@@ -541,10 +540,10 @@
                         const homophone = this.sbox[byteToEncrypt][randomIndex];
                         homophones.push(homophone);
                         
-                        // Обновляем предыдущий блок для CBC
+                        // Обновляем предыдущий блок для CBC (запоминаем ЗАШИФРОВАННЫЙ байт)
                         if (diffusionMode === 'cbc') {
-                            const decryptedByte = this.inverseSbox.get(homophone);
-                            previousBlock[i % 16] = decryptedByte;
+                            const encryptedByte = this.inverseSbox.get(homophone);
+                            previousBlock[i % 16] = encryptedByte;
                         }
                     }
                     
@@ -568,7 +567,6 @@
                     let cipherHomophones = homophones;
                     let previousBlock = null;
                     
-                    // Только для CBC режима
                     if (diffusionMode === 'cbc') {
                         if (homophones.length < 16) {
                             throw new Error('Invalid encrypted data for CBC mode');
@@ -578,13 +576,10 @@
                         ivHomophones = homophones.slice(0, 16);
                         cipherHomophones = homophones.slice(16);
                         
-                        // Восстанавливаем IV
+                        // Восстанавливаем IV из омофонов
                         this.initializationVector = new Uint8Array(16);
                         for (let i = 0; i < 16; i++) {
                             const homophone = ivHomophones[i];
-                            if (!this.inverseSbox.has(homophone)) {
-                                throw new Error('Invalid homophone in IV');
-                            }
                             this.initializationVector[i] = this.inverseSbox.get(homophone);
                         }
                         
@@ -595,21 +590,16 @@
                     
                     for (let i = 0; i < cipherHomophones.length; i++) {
                         const homophone = cipherHomophones[i];
-                        
-                        if (!this.inverseSbox.has(homophone)) {
-                            throw new Error('Invalid homophone in ciphertext: ' + homophone);
-                        }
-                        
                         let decryptedByte = this.inverseSbox.get(homophone);
                         
-                        // CBC: XOR с соответствующим байтом предыдущего блока
+                        // CBC: XOR с соответствующим байтом предыдущего ЗАШИФРОВАННОГО блока
                         if (diffusionMode === 'cbc' && previousBlock) {
                             decryptedByte ^= previousBlock[i % 16];
                         }
                         
                         plaintextBuffer[i] = decryptedByte;
                         
-                        // Обновляем предыдущий блок для CBC
+                        // Обновляем предыдущий блок (запоминаем ЗАШИФРОВАННЫЙ байт)
                         if (diffusionMode === 'cbc') {
                             previousBlock[i % 16] = this.inverseSbox.get(homophone);
                         }
