@@ -325,7 +325,7 @@
                     <p>Using Base64 encoding: 64 characters × 64 characters = 4096 homophones</p>
                     <p>Ratio: 1 byte → 2 characters (vs 4 characters in HEX)</p>
                     <div class="base64-chars">
-                        Base64 characters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+
+                        Base64 characters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
                     </div>
                 </div>
             </div>
@@ -399,26 +399,11 @@
     </div>
 
     <script>
-        // Base64 character set (URL-safe)
-        const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-
-        class GaloisField {
-            static multiply(a, b) {
-                let p = 0;
-                for (let i = 0; i < 8; i++) {
-                    if (b & 1) p ^= a;
-                    const hiBitSet = a & 0x80;
-                    a = (a << 1) & 0xFF;
-                    if (hiBitSet) a ^= 0x1B;
-                    b >>= 1;
-                }
-                return p;
-            }
-        }
+        // Правильный Base64 алфавит (стандартный)
+        const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
         class DeterministicSBoxGenerator {
             static async generateSBox(encryptionKey) {
-                const homophoneCount = 4096;
                 const sbox = new Array(256);
                 const inverseSbox = new Map();
                 
@@ -428,14 +413,24 @@
                     false, ['sign']
                 );
                 
-                const allHomophones = Array.from({length: homophoneCount}, (_, i) => i);
+                // Генерируем ВСЕ возможные уникальные омофоны (4096 комбинаций)
+                const allHomophones = [];
+                for (let i = 0; i < 64; i++) {
+                    for (let j = 0; j < 64; j++) {
+                        // Каждый омофон - это уникальная пара символов Base64
+                        const homophone = BASE64_CHARS[i] + BASE64_CHARS[j];
+                        allHomophones.push(homophone);
+                    }
+                }
+                
+                // Детерминистически перемешиваем омофоны на основе ключа
                 await this.fastDeterministicShuffle(allHomophones, hmacKey);
                 
                 let index = 0;
                 for (let inputByte = 0; inputByte < 256; inputByte++) {
                     sbox[inputByte] = new Array(16);
                     for (let homophoneIndex = 0; homophoneIndex < 16; homophoneIndex++) {
-                        const homophone = allHomophones[index++ % homophoneCount];
+                        const homophone = allHomophones[index++ % 4096];
                         sbox[inputByte][homophoneIndex] = homophone;
                         inverseSbox.set(homophone, inputByte);
                     }
@@ -511,57 +506,6 @@
                 }
             }
 
-            // Преобразуем омофон (0-4095) в два Base64 символа
-            homophoneToBase64(homophone) {
-                if (homophone < 0 || homophone >= 4096) {
-                    throw new Error(`Invalid homophone value: ${homophone}`);
-                }
-                
-                const firstChar = Math.floor(homophone / 64);
-                const secondChar = homophone % 64;
-                
-                return BASE64_CHARS[firstChar] + BASE64_CHARS[secondChar];
-            }
-
-            // Преобразуем два Base64 символа обратно в омофон
-            base64ToHomophone(chars) {
-                if (chars.length !== 2) {
-                    throw new Error(`Invalid Base64 homophone: ${chars}`);
-                }
-                
-                const firstValue = BASE64_CHARS.indexOf(chars[0]);
-                const secondValue = BASE64_CHARS.indexOf(chars[1]);
-                
-                if (firstValue === -1 || secondValue === -1) {
-                    throw new Error(`Invalid Base64 characters: ${chars}`);
-                }
-                
-                return firstValue * 64 + secondValue;
-            }
-
-            // Преобразуем массив омофонов в Base64 строку
-            homophonesToBase64(homophones) {
-                let result = '';
-                for (const homophone of homophones) {
-                    result += this.homophoneToBase64(homophone);
-                }
-                return result;
-            }
-
-            // Преобразуем Base64 строку обратно в массив омофонов
-            base64ToHomophones(base64String) {
-                if (base64String.length % 2 !== 0) {
-                    throw new Error('Base64 string length must be even');
-                }
-                
-                const homophones = [];
-                for (let i = 0; i < base64String.length; i += 2) {
-                    const homophone = this.base64ToHomophone(base64String.substring(i, i + 2));
-                    homophones.push(homophone);
-                }
-                return homophones;
-            }
-
             async encryptData(plaintext, diffusionMode = 'cbc') {
                 try {
                     const encoder = new TextEncoder();
@@ -587,28 +531,25 @@
                         
                         if (diffusionMode === 'cbc') {
                             // Обновляем блок для следующей итерации
-                            const homophoneBytes = new Uint8Array([
-                                (homophone >> 8) & 0xFF,
-                                homophone & 0xFF
-                            ]);
-                            
+                            const homophoneBytes = new TextEncoder().encode(homophone);
                             for (let j = 0; j < 16; j++) {
                                 previousBlock[j] ^= homophoneBytes[j % 2];
                             }
                         }
                     }
                     
-                    // Кодируем IV и омофоны в Base64
+                    // Кодируем IV в Base64 омофоны
                     const ivHomophones = [];
                     for (let i = 0; i < 16; i += 2) {
                         if (i + 1 < 16) {
-                            const homophone = (this.initializationVector[i] << 8) | this.initializationVector[i + 1];
-                            ivHomophones.push(homophone);
+                            const ivPair = String.fromCharCode(this.initializationVector[i]) + 
+                                          String.fromCharCode(this.initializationVector[i + 1]);
+                            ivHomophones.push(ivPair);
                         }
                     }
                     
                     const allHomophones = [...ivHomophones, ...homophones];
-                    return this.homophonesToBase64(allHomophones);
+                    return allHomophones.join('');
                     
                 } catch (error) {
                     console.error('Encryption failed:', error);
@@ -618,8 +559,15 @@
 
             async decryptData(encryptedData, diffusionMode = 'cbc') {
                 try {
-                    // Преобразуем Base64 строку обратно в омофоны
-                    const allHomophones = this.base64ToHomophones(encryptedData);
+                    // Разбиваем строку на омофоны (по 2 символа)
+                    if (encryptedData.length % 2 !== 0) {
+                        throw new Error('Invalid encrypted data length');
+                    }
+                    
+                    const allHomophones = [];
+                    for (let i = 0; i < encryptedData.length; i += 2) {
+                        allHomophones.push(encryptedData.substring(i, i + 2));
+                    }
                     
                     // Извлекаем IV (первые 8 омофонов = 16 байт)
                     if (allHomophones.length < 8) {
@@ -630,20 +578,21 @@
                     const cipherHomophones = allHomophones.slice(8);
                     
                     // Восстанавливаем IV из омофонов
-                    const iv = new Uint8Array(16);
+                    this.initializationVector = new Uint8Array(16);
                     for (let i = 0; i < 8; i++) {
-                        iv[i * 2] = (ivHomophones[i] >> 8) & 0xFF;
-                        iv[i * 2 + 1] = ivHomophones[i] & 0xFF;
+                        const bytes = new TextEncoder().encode(ivHomophones[i]);
+                        this.initializationVector[i * 2] = bytes[0];
+                        this.initializationVector[i * 2 + 1] = bytes[1];
                     }
                     
                     let plaintextBuffer = new Uint8Array(cipherHomophones.length);
-                    let previousBlock = new Uint8Array(iv);
+                    let previousBlock = new Uint8Array(this.initializationVector);
                     
                     for (let i = 0; i < cipherHomophones.length; i++) {
                         const homophone = cipherHomophones[i];
                         
                         if (!this.inverseSbox.has(homophone)) {
-                            throw new Error('Invalid homophone in ciphertext');
+                            throw new Error('Invalid homophone in ciphertext: ' + homophone);
                         }
                         
                         let decryptedByte = this.inverseSbox.get(homophone);
@@ -656,11 +605,7 @@
                         
                         if (diffusionMode === 'cbc') {
                             // Обновляем блок для следующей итерации
-                            const homophoneBytes = new Uint8Array([
-                                (homophone >> 8) & 0xFF,
-                                homophone & 0xFF
-                            ]);
-                            
+                            const homophoneBytes = new TextEncoder().encode(homophone);
                             for (let j = 0; j < 16; j++) {
                                 previousBlock[j] ^= homophoneBytes[j % 2];
                             }
@@ -775,28 +720,32 @@
 
             displayTestResults(results) {
                 const testResultsDiv = document.getElementById('testResults');
-                testResultsDiv.innerHTML = '';
-                
-                results.forEach(test => {
-                    const testDiv = document.createElement('div');
-                    testDiv.className = `test-result ${test.status === 'PASS' ? 'test-pass' : 
-                                       test.status === 'FAIL' ? 'test-fail' : 
-                                       test.status === 'WARNING' ? 'test-warning' : 'test-info'}`;
+                if (testResultsDiv) {
+                    testResultsDiv.innerHTML = '';
                     
-                    testDiv.innerHTML = `
-                        <strong>${test.name}</strong>: ${test.status}
-                        <div>${test.message}</div>
-                        <div style="font-size: 0.8em; color: #94a3b8; margin-top: 0.5rem;">${test.details}</div>
-                    `;
-                    
-                    testResultsDiv.appendChild(testDiv);
-                });
+                    results.forEach(test => {
+                        const testDiv = document.createElement('div');
+                        testDiv.className = `test-result ${test.status === 'PASS' ? 'test-pass' : 
+                                           test.status === 'FAIL' ? 'test-fail' : 
+                                           test.status === 'WARNING' ? 'test-warning' : 'test-info'}`;
+                        
+                        testDiv.innerHTML = `
+                            <strong>${test.name}</strong>: ${test.status}
+                            <div>${test.message}</div>
+                            <div style="font-size: 0.8em; color: #94a3b8; margin-top: 0.5rem;">${test.details}</div>
+                        `;
+                        
+                        testResultsDiv.appendChild(testDiv);
+                    });
+                }
             }
 
             setTestStatus(type, message) {
                 const indicator = document.getElementById('testStatus');
-                indicator.className = `status-${type}`;
-                indicator.textContent = message;
+                if (indicator) {
+                    indicator.className = `status-${type}`;
+                    indicator.textContent = message;
+                }
             }
 
             async handleDecrypt() {
@@ -827,7 +776,8 @@
                 document.getElementById('inputData').value = '';
                 document.getElementById('outputData').textContent = '';
                 document.getElementById('securityInfo').textContent = '';
-                document.getElementById('testResults').innerHTML = '';
+                const testResultsDiv = document.getElementById('testResults');
+                if (testResultsDiv) testResultsDiv.innerHTML = '';
                 document.getElementById('outputStats').textContent = 'Waiting for operation...';
                 this.setStatus('ready', 'Ready');
                 this.setTestStatus('ready', 'Ready to test');
@@ -854,18 +804,24 @@
 
             setStatus(type, message) {
                 const indicator = document.getElementById('statusIndicator');
-                indicator.className = `status-${type}`;
-                indicator.textContent = message;
+                if (indicator) {
+                    indicator.className = `status-${type}`;
+                    indicator.textContent = message;
+                }
             }
 
             showLoading(button) {
-                document.getElementById(`${button}Loading`).style.display = 'inline-block';
-                document.getElementById(`${button}Btn`).disabled = true;
+                const loadingElement = document.getElementById(`${button}Loading`);
+                const buttonElement = document.getElementById(`${button}Btn`);
+                if (loadingElement) loadingElement.style.display = 'inline-block';
+                if (buttonElement) buttonElement.disabled = true;
             }
 
             hideLoading(button) {
-                document.getElementById(`${button}Loading`).style.display = 'none';
-                document.getElementById(`${button}Btn`).disabled = false;
+                const loadingElement = document.getElementById(`${button}Loading`);
+                const buttonElement = document.getElementById(`${button}Btn`);
+                if (loadingElement) loadingElement.style.display = 'none';
+                if (buttonElement) buttonElement.disabled = false;
             }
 
             updateSecurityInfo(operation, inputLength, outputLength) {
