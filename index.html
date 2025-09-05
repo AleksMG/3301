@@ -512,44 +512,43 @@
                     const plaintextBuffer = encoder.encode(plaintext);
                     const homophones = [];
                     
-                    this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
-                    let previousBlock = new Uint8Array(this.initializationVector);
+                    // Только для CBC режима
+                    if (diffusionMode === 'cbc') {
+                        // Генерируем случайный IV (16 байт)
+                        this.initializationVector = crypto.getRandomValues(new Uint8Array(16));
+                        
+                        // Кодируем каждый байт IV в омофон
+                        for (let i = 0; i < 16; i++) {
+                            const ivByte = this.initializationVector[i];
+                            const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
+                            const ivHomophone = this.sbox[ivByte][randomIndex];
+                            homophones.push(ivHomophone);
+                        }
+                    }
+                    
+                    let previousBlock = diffusionMode === 'cbc' ? new Uint8Array(this.initializationVector) : null;
                     
                     for (let i = 0; i < plaintextBuffer.length; i++) {
-                        const plainByte = plaintextBuffer[i];
+                        let byteToEncrypt = plaintextBuffer[i];
                         
-                        let byteToEncrypt = plainByte;
-                        if (diffusionMode !== 'none') {
+                        // CBC: XOR с соответствующим байтом предыдущего блока
+                        if (diffusionMode === 'cbc' && previousBlock) {
                             byteToEncrypt ^= previousBlock[i % 16];
                         }
                         
-                        // Случайно выбираем один из 16 омофонов для этого байта
+                        // Выбираем случайный омофон для байта
                         const randomIndex = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
                         const homophone = this.sbox[byteToEncrypt][randomIndex];
-                        
                         homophones.push(homophone);
                         
+                        // Обновляем предыдущий блок для CBC
                         if (diffusionMode === 'cbc') {
-                            // Обновляем блок для следующей итерации
-                            const homophoneBytes = new TextEncoder().encode(homophone);
-                            for (let j = 0; j < 16; j++) {
-                                previousBlock[j] ^= homophoneBytes[j % 2];
-                            }
+                            const decryptedByte = this.inverseSbox.get(homophone);
+                            previousBlock[i % 16] = decryptedByte;
                         }
                     }
                     
-                    // Кодируем IV в Base64 омофоны
-                    const ivHomophones = [];
-                    for (let i = 0; i < 16; i += 2) {
-                        if (i + 1 < 16) {
-                            const ivPair = String.fromCharCode(this.initializationVector[i]) + 
-                                          String.fromCharCode(this.initializationVector[i + 1]);
-                            ivHomophones.push(ivPair);
-                        }
-                    }
-                    
-                    const allHomophones = [...ivHomophones, ...homophones];
-                    return allHomophones.join('');
+                    return homophones.join('');
                     
                 } catch (error) {
                     console.error('Encryption failed:', error);
@@ -559,34 +558,40 @@
 
             async decryptData(encryptedData, diffusionMode = 'cbc') {
                 try {
-                    // Разбиваем строку на омофоны (по 2 символа)
-                    if (encryptedData.length % 2 !== 0) {
-                        throw new Error('Invalid encrypted data length');
-                    }
-                    
-                    const allHomophones = [];
+                    // Разбиваем на омофоны (по 2 символа)
+                    const homophones = [];
                     for (let i = 0; i < encryptedData.length; i += 2) {
-                        allHomophones.push(encryptedData.substring(i, i + 2));
+                        homophones.push(encryptedData.substring(i, i + 2));
                     }
                     
-                    // Извлекаем IV (первые 8 омофонов = 16 байт)
-                    if (allHomophones.length < 8) {
-                        throw new Error('Invalid encrypted data format');
+                    let ivHomophones = [];
+                    let cipherHomophones = homophones;
+                    let previousBlock = null;
+                    
+                    // Только для CBC режима
+                    if (diffusionMode === 'cbc') {
+                        if (homophones.length < 16) {
+                            throw new Error('Invalid encrypted data for CBC mode');
+                        }
+                        
+                        // Первые 16 омофонов - это IV
+                        ivHomophones = homophones.slice(0, 16);
+                        cipherHomophones = homophones.slice(16);
+                        
+                        // Восстанавливаем IV
+                        this.initializationVector = new Uint8Array(16);
+                        for (let i = 0; i < 16; i++) {
+                            const homophone = ivHomophones[i];
+                            if (!this.inverseSbox.has(homophone)) {
+                                throw new Error('Invalid homophone in IV');
+                            }
+                            this.initializationVector[i] = this.inverseSbox.get(homophone);
+                        }
+                        
+                        previousBlock = new Uint8Array(this.initializationVector);
                     }
                     
-                    const ivHomophones = allHomophones.slice(0, 8);
-                    const cipherHomophones = allHomophones.slice(8);
-                    
-                    // Восстанавливаем IV из омофонов
-                    this.initializationVector = new Uint8Array(16);
-                    for (let i = 0; i < 8; i++) {
-                        const bytes = new TextEncoder().encode(ivHomophones[i]);
-                        this.initializationVector[i * 2] = bytes[0];
-                        this.initializationVector[i * 2 + 1] = bytes[1];
-                    }
-                    
-                    let plaintextBuffer = new Uint8Array(cipherHomophones.length);
-                    let previousBlock = new Uint8Array(this.initializationVector);
+                    const plaintextBuffer = new Uint8Array(cipherHomophones.length);
                     
                     for (let i = 0; i < cipherHomophones.length; i++) {
                         const homophone = cipherHomophones[i];
@@ -597,18 +602,16 @@
                         
                         let decryptedByte = this.inverseSbox.get(homophone);
                         
-                        if (diffusionMode !== 'none') {
+                        // CBC: XOR с соответствующим байтом предыдущего блока
+                        if (diffusionMode === 'cbc' && previousBlock) {
                             decryptedByte ^= previousBlock[i % 16];
                         }
                         
                         plaintextBuffer[i] = decryptedByte;
                         
+                        // Обновляем предыдущий блок для CBC
                         if (diffusionMode === 'cbc') {
-                            // Обновляем блок для следующей итерации
-                            const homophoneBytes = new TextEncoder().encode(homophone);
-                            for (let j = 0; j < 16; j++) {
-                                previousBlock[j] ^= homophoneBytes[j % 2];
-                            }
+                            previousBlock[i % 16] = this.inverseSbox.get(homophone);
                         }
                     }
                     
@@ -693,7 +696,7 @@
                     const result = await this.cipher.encryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    this.updateSecurityInfo('encrypt', inputData.length, result.length);
+                    this.updateSecurityInfo('encrypt', inputData.length, result.length, diffusionMode);
                     this.runAutomaticTests(result);
                     this.setStatus('ready', 'Encryption successful');
                 } catch (error) {
@@ -762,7 +765,7 @@
                     const result = await this.cipher.decryptData(inputData, diffusionMode);
 
                     document.getElementById('outputData').textContent = result;
-                    this.updateSecurityInfo('decrypt', inputData.length, result.length);
+                    this.updateSecurityInfo('decrypt', inputData.length, result.length, diffusionMode);
                     this.setStatus('ready', 'Decryption successful');
                 } catch (error) {
                     this.setStatus('error', 'Decryption failed: ' + error.message);
@@ -824,14 +827,17 @@
                 if (buttonElement) buttonElement.disabled = false;
             }
 
-            updateSecurityInfo(operation, inputLength, outputLength) {
-                const diffusionMode = document.getElementById('diffusionMode').value;
-                
+            updateSecurityInfo(operation, inputLength, outputLength, diffusionMode) {
                 let info = `Operation: ${operation.toUpperCase()}\n`;
                 info += `Input length: ${inputLength} characters\n`;
                 info += `Output length: ${outputLength} characters\n`;
                 info += `Compression ratio: ${(outputLength/inputLength).toFixed(2)}:1\n`;
                 info += `Diffusion mode: ${diffusionMode}\n`;
+                
+                if (diffusionMode === 'cbc') {
+                    info += `IV: 16 bytes (encoded as 16 homophones)\n`;
+                }
+                
                 info += `Homophone set: 4096 combinations\n`;
                 info += `Encoding: Base64 (2 chars per homophone)\n`;
                 info += `S-Box: Deterministic generation\n`;
